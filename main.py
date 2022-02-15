@@ -42,11 +42,12 @@ class character:
         screen.blit(self.img, (self.x, self.y))
 
 
+cowboy = character(playerX, playerY, playerImg)
 
 # game loop
 running = True
 while running:
-    screen.fill((255, 255, 255))
+    
 #    playerX += 0.1
 
     for event in pygame.event.get():
@@ -55,9 +56,8 @@ while running:
 
 
 
-    cowboy = character(playerX, playerY, playerImg)
     cowboy.KeyStroke()
-    playerX = playerX + cowboy.KeyStroke()
+    screen.fill((256, 256, 256))
     cowboy.display()
 
     pygame.display.update()
