@@ -19,21 +19,28 @@ playerY = 260
 playerX_change = 0
 
 class character:
-    def __init__(self, x, y, img):
+    def __init__(self, x, y, img, vel):
         self.x = x
         self.y = y
         self.img = img
+        self.vel = vel
 
     def KeyStroke(self):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 print("Left")
-                self.x -= 0.01
+                self.x -= self.vel
                 return self.x
             if event.key == pygame.K_RIGHT:
                 print("Right")
-                self.x += 0.01
+                self.x += self.vel
                 return self.x
+            if event.key == pygame.K_UP:
+                print("up")
+                self.y -= self.vel
+            if event.key == pygame.K_DOWN:
+                print("down")
+                self.y += self.vel
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 print("Key released")
@@ -42,7 +49,7 @@ class character:
         screen.blit(self.img, (self.x, self.y))
 
 
-cowboy = character(playerX, playerY, playerImg)
+cowboy = character(playerX, playerY, playerImg, 1)
 
 # game loop
 running = True
@@ -57,7 +64,7 @@ while running:
 
 
     cowboy.KeyStroke()
-    screen.fill((256, 256, 256))
+    screen.fill((255, 255, 255))
     cowboy.display()
 
     pygame.display.update()
