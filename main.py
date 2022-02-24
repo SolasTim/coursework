@@ -16,17 +16,21 @@ playerImg = pygame.image.load("cowboy.png")
 playerImg = pygame.transform.scale(playerImg, (46, 68))
 playerX = 380
 playerY = 260
-playerX_change = 0
 
 
-class character:
+# sets the players attributes outside of the class. Will most likely change this
+
+class Character:  # this class handles most parts to do with the player
     def __init__(self, x, y, img, vel):
         self.x = x
         self.y = y
         self.img = img
         self.vel = vel
 
+    # the constructor method allows for the player to have different attributes when called
+
     def KeyStroke(self):
+        # keystrokes handles whenever a key is pressed to move the player
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 print("Left")
@@ -62,18 +66,56 @@ class character:
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 print("Key released")
+        # will change x and y co-ordinates to move player around screen.
+        # added boundary so player cant move out of screen
 
     def display(self):
         screen.blit(self.img, (self.x, self.y))
 
 
-cowboy = character(playerX, playerY, playerImg, 1)
+# Enemy
 
-# game loop
+enemyImg = pygame.image.load("knight.png")
+enemyImg = pygame.transform.scale(enemyImg, (46, 68))
+enemyX = 380
+enemyY = 260
+
+
+# same as player class for now will again most likely change
+
+class Enemy:
+
+    def __init__(self, x, y, img, vel):
+        self.x = x
+        self.y = y
+        self.img = img
+        self.vel = vel
+
+    def move(self):  # chase movement
+        # Movement along x direction
+        if self.x > px:
+            self.x -= self.vel
+        elif self.x < px:
+            self.x += self.vel
+        # Movement along y direction
+        if self.y < py:
+            self.y += self.vel
+        elif self.y > py:
+            self.y -= self.vel
+            #MAKE PX , PY CHAR X AND CHARY SOMEHOW 
+
+        #moves enemy towards player
+
+    def display(self):
+        screen.blit(self.img, (self.x, self.y))
+
+
+cowboy = Character(playerX, playerY, playerImg, 1)
+knight = Enemy(enemyX, enemyY, enemyImg, 0.1)
+
+# game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
 running = True
 while running:
-
-    #    playerX += 0.1
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -82,5 +124,6 @@ while running:
     cowboy.KeyStroke()
     screen.fill((255, 255, 255))
     cowboy.display()
+    knight.display()
 
     pygame.display.update()
