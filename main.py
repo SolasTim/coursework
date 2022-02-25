@@ -91,18 +91,17 @@ class Enemy:
         self.img = img
         self.vel = vel
 
-    def move(self):  # chase movement
+    def move(self, playerX, playerY):  # chase movement
         # Movement along x direction
-        if self.x > px:
+        if self.x > playerX:
             self.x -= self.vel
-        elif self.x < px:
+        elif self.x < playerX:
             self.x += self.vel
         # Movement along y direction
-        if self.y < py:
+        if self.y < playerY:
             self.y += self.vel
-        elif self.y > py:
+        elif self.y > playerY:
             self.y -= self.vel
-            #MAKE PX , PY CHAR X AND CHARY SOMEHOW 
 
         #moves enemy towards player
 
@@ -111,7 +110,7 @@ class Enemy:
 
 
 cowboy = Character(playerX, playerY, playerImg, 1)
-knight = Enemy(enemyX, enemyY, enemyImg, 0.1)
+knight = Enemy(enemyX, enemyY, enemyImg, 0.05)
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
 running = True
@@ -122,6 +121,7 @@ while running:
             running = False
 
     cowboy.KeyStroke()
+    knight.move(cowboy.x, cowboy.y)
     screen.fill((255, 255, 255))
     cowboy.display()
     knight.display()
