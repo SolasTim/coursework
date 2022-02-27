@@ -1,10 +1,15 @@
 import pygame
+import math
 
 # initialise pygame
 pygame.init()
 
 # create screen
-screen = pygame.display.set_mode((800, 600))
+ScreenResX = 800
+ScreenResY = 600
+screen = pygame.display.set_mode((ScreenResX, ScreenResY))
+
+#allows screen resolution to be changed easily
 
 # Title and Icon
 pygame.display.set_caption("woah I don't know what im doing!")
@@ -33,21 +38,25 @@ class Character:  # this class handles most parts to do with the player
         # keystrokes handles whenever a key is pressed to move the player
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
+                # picks up when left key is pressed
                 print("Left")
                 self.x -= self.vel
+                #changes sprite location in accordance to speed
                 if self.x <= 0:
                     self.x = 0
                     return self.x
                 else:
                     return self.x
             if event.key == pygame.K_RIGHT:
+                # picks up when right key is pressed
                 print("Right")
                 self.x += self.vel
-                if self.x >= 754:
-                    self.x = 754
+                if self.x >= (ScreenResX - 46):
+                    self.x = ScreenResX - 46
                 else:
                     return self.x
             if event.key == pygame.K_UP:
+                # picks up when up key is pressed
                 print("up")
                 self.y -= self.vel
                 if self.y <= 0:
@@ -56,10 +65,11 @@ class Character:  # this class handles most parts to do with the player
                 else:
                     return self.y
             if event.key == pygame.K_DOWN:
+                #picks up when down key is pressed
                 print("down")
                 self.y += self.vel
-                if self.y >= 530:
-                    self.y = 530
+                if self.y >= (ScreenResY - 68):
+                    self.y = ScreenResY - 68
                     return self.y
                 else:
                     return self.y
@@ -108,9 +118,51 @@ class Enemy:
     def display(self):
         screen.blit(self.img, (self.x, self.y))
 
+#Projecile
+
+
+class Projectile:
+
+    def __init__(self, x, y, vel):
+        self.pos = (x, y)
+        #position of bullet
+        mx, my = pygame.mouse.get_pos()
+        #get position of mouse on screen
+        self.dir = (mx - x, my - y)
+        #direction of bullet
+        length = math.hypot(*self.dir)
+        if length == 0.0:
+            self.dir = (0, -1)
+        else:
+            self.dir = (self.dir[0] / length, self.dir[1] / length)
+        angle = math.degrees(math.atan2(-self.dir[1], self.dir[0]))
+
+        self.bullet = pygame.Surface((7,2)).convert_alpha()
+        self.bullet.fill((0, 0, 0))
+        #colour of bullet
+        self.bullet = pygame.transform.rotate(self.bullet, angle)
+        #moves the rotation of the bullet to its trajectory path
+        self.vel = vel
+
+    def update(self):
+        self.pos = (self.pos[0] + self.dir[0] * self.vel,
+                    self.pos[1] + self.dir[1] * self.vel)
+        print(self.pos)
+    #updates bullets position on the screen
+
+    def draw(self, surf):
+        bullet_rect = self.bullet.get_rect(center = self.pos)
+        surf.blit(self.bullet, bullet_rect)
+    #draws bullet to screen
+
+
+
 
 cowboy = Character(playerX, playerY, playerImg, 1)
 knight = Enemy(enemyX, enemyY, enemyImg, 0.05)
+pos = (cowboy.x, cowboy.y)
+bullets = []
+
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
 running = True
@@ -119,11 +171,26 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            bullets.append(Projectile(cowboy.x, cowboy.y, 2))
+        #allows for mouse button to be pressed down signalling a shot has been fired
+
+    for bullet in bullets[:]:
+        bullet.update()
+        if not screen.get_rect().collidepoint(bullet.pos):
+            bullets.remove(bullet)
+    #either updates bullets position or removes bullet if not on screen
+
 
     cowboy.KeyStroke()
     knight.move(cowboy.x, cowboy.y)
     screen.fill((255, 255, 255))
     cowboy.display()
+
+    for bullet in bullets:
+        bullet.draw(screen)
+
     knight.display()
+
 
     pygame.display.update()
