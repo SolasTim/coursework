@@ -3,6 +3,7 @@ import math
 
 # initialise pygame
 pygame.init()
+clock = pygame.time.Clock()
 
 # create screen
 ScreenResX = 800
@@ -39,7 +40,6 @@ class Character:  # this class handles most parts to do with the player
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 # picks up when left key is pressed
-                print("Left")
                 self.x -= self.vel
                 #changes sprite location in accordance to speed
                 if self.x <= 0:
@@ -49,7 +49,6 @@ class Character:  # this class handles most parts to do with the player
                     return self.x
             if event.key == pygame.K_RIGHT:
                 # picks up when right key is pressed
-                print("Right")
                 self.x += self.vel
                 if self.x >= (ScreenResX - 46):
                     self.x = ScreenResX - 46
@@ -57,7 +56,6 @@ class Character:  # this class handles most parts to do with the player
                     return self.x
             if event.key == pygame.K_UP:
                 # picks up when up key is pressed
-                print("up")
                 self.y -= self.vel
                 if self.y <= 0:
                     self.y = 0
@@ -66,16 +64,14 @@ class Character:  # this class handles most parts to do with the player
                     return self.y
             if event.key == pygame.K_DOWN:
                 #picks up when down key is pressed
-                print("down")
                 self.y += self.vel
                 if self.y >= (ScreenResY - 68):
                     self.y = ScreenResY - 68
                     return self.y
                 else:
                     return self.y
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                print("Key released")
+#        if event.type == pygame.KEYUP:
+ #           print("Key released")
         # will change x and y co-ordinates to move player around screen.
         # added boundary so player cant move out of screen
 
@@ -100,6 +96,7 @@ class Enemy:
         self.y = y
         self.img = img
         self.vel = vel
+
 
     def move(self, playerX, playerY):  # chase movement
         # Movement along x direction
@@ -144,30 +141,37 @@ class Projectile:
         #moves the rotation of the bullet to its trajectory path
         self.vel = vel
 
+
     def update(self):
         self.pos = (self.pos[0] + self.dir[0] * self.vel,
                     self.pos[1] + self.dir[1] * self.vel)
-        print(self.pos)
     #updates bullets position on the screen
 
     def draw(self, surf):
         bullet_rect = self.bullet.get_rect(center = self.pos)
+        #TESTING EL CODE TO SEE IF WORK NOT ACTUAL TEST try call rect from here first before self.rect
         surf.blit(self.bullet, bullet_rect)
     #draws bullet to screen
-
-
 
 
 cowboy = Character(playerX, playerY, playerImg, 1)
 knight = Enemy(enemyX, enemyY, enemyImg, 0.05)
 pos = (cowboy.x, cowboy.y)
 bullets = []
+enemy_rect = enemyImg.get_rect(center=(knight.x, knight.y))
+hit = 0
+
+def BulletCollision(bulletx, bullety, EnemyRect):
+    #distance = math.sqrt((math.pow(enemyx - bulletx,2)) + (math.pow(enemyy - bullety,2)))
+    if EnemyRect.collidepoint(bulletx, bullety):
+        return True
+    else:
+        return False
 
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
 running = True
 while running:
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -179,6 +183,11 @@ while running:
         bullet.update()
         if not screen.get_rect().collidepoint(bullet.pos):
             bullets.remove(bullet)
+        if BulletCollision(knight.x, knight.y, enemy_rect) == True:
+            bullets.remove(bullet)
+            hit += 1
+            print(hit)
+
     #either updates bullets position or removes bullet if not on screen
 
 
@@ -192,5 +201,5 @@ while running:
 
     knight.display()
 
-
+    clock.tick(60)
     pygame.display.update()
