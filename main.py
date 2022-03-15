@@ -32,6 +32,7 @@ class Character:  # this class handles most parts to do with the player
         self.y = y
         self.img = img
         self.vel = vel
+        self.hitbox = self.hitbox = (self.x, self.y, 30, 60)
 
     # the constructor method allows for the player to have different attributes when called
 
@@ -77,7 +78,7 @@ class Character:  # this class handles most parts to do with the player
 
     def display(self):
         screen.blit(self.img, (self.x, self.y))
-
+        pygame.draw.rect(screen, (0,0,255), self.hitbox , 2)
 
 # Enemy
 
@@ -96,6 +97,7 @@ class Enemy:
         self.y = y
         self.img = img
         self.vel = vel
+        self.hitbox = (self.x, self.y, 30, 60)
 
 
     def move(self, playerX, playerY):  # chase movement
@@ -114,6 +116,7 @@ class Enemy:
 
     def display(self):
         screen.blit(self.img, (self.x, self.y))
+        pygame.draw.rect(screen, (255,0,0), self.hitbox , 2)
 
 #Projecile
 
@@ -154,16 +157,15 @@ class Projectile:
     #draws bullet to screen
 
 
-cowboy = Character(playerX, playerY, playerImg, 1)
+cowboy = Character(playerX, playerY, playerImg, 5)
 knight = Enemy(enemyX, enemyY, enemyImg, 0.05)
 pos = (cowboy.x, cowboy.y)
 bullets = []
-enemy_rect = enemyImg.get_rect(center=(knight.x, knight.y))
 hit = 0
 
-def BulletCollision(bulletx, bullety, EnemyRect):
+def BulletCollision(bulletx, bullety, Rect):
     #distance = math.sqrt((math.pow(enemyx - bulletx,2)) + (math.pow(enemyy - bullety,2)))
-    if EnemyRect.collidepoint(bulletx, bullety):
+    if Rect.collidepoint(bulletx, bullety):
         return True
     else:
         return False
@@ -176,20 +178,20 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            bullets.append(Projectile(cowboy.x, cowboy.y, 2))
+            bullets.append(Projectile(cowboy.x , cowboy.y, 2))
         #allows for mouse button to be pressed down signalling a shot has been fired
+
 
     for bullet in bullets[:]:
         bullet.update()
         if not screen.get_rect().collidepoint(bullet.pos):
             bullets.remove(bullet)
-        if BulletCollision(knight.x, knight.y, enemy_rect) == True:
-            bullets.remove(bullet)
-            hit += 1
-            print(hit)
+        #if BulletCollision(knight.x, knight.y, enemyImg.get_rect(center=(knight.x, knight.y))) == True:
+        #    bullets.remove(bullet)
+        #    hit += 1
+        #    print(hit)
 
     #either updates bullets position or removes bullet if not on screen
-
 
     cowboy.KeyStroke()
     knight.move(cowboy.x, cowboy.y)
