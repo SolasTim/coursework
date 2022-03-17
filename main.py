@@ -32,7 +32,7 @@ class Character:  # this class handles most parts to do with the player
         self.y = y
         self.img = img
         self.vel = vel
-        self.hitbox = self.hitbox = (self.x, self.y, 30, 60)
+        self.rect = (self.x, self.y, 45, 70)
 
     # the constructor method allows for the player to have different attributes when called
 
@@ -78,7 +78,7 @@ class Character:  # this class handles most parts to do with the player
 
     def display(self):
         screen.blit(self.img, (self.x, self.y))
-        pygame.draw.rect(screen, (0,0,255), self.hitbox , 2)
+        pygame.draw.rect(screen, (0,0,255), (self.x, self.y, 45, 70), 2)
 
 # Enemy
 
@@ -97,7 +97,7 @@ class Enemy:
         self.y = y
         self.img = img
         self.vel = vel
-        self.hitbox = (self.x, self.y, 30, 60)
+        self.rect = (self.x, self.y, 45, 70)
 
 
     def move(self, playerX, playerY):  # chase movement
@@ -116,10 +116,12 @@ class Enemy:
 
     def display(self):
         screen.blit(self.img, (self.x, self.y))
-        pygame.draw.rect(screen, (255,0,0), self.hitbox , 2)
+        pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, 45, 70), 2)
+        #unsure why self.rect doesnt work but calling its var does
+
+
 
 #Projecile
-
 
 class Projectile:
 
@@ -152,8 +154,8 @@ class Projectile:
 
     def draw(self, surf):
         bullet_rect = self.bullet.get_rect(center = self.pos)
-        #TESTING EL CODE TO SEE IF WORK NOT ACTUAL TEST try call rect from here first before self.rect
         surf.blit(self.bullet, bullet_rect)
+        pygame.draw.rect(screen, (0, 255, 0), (*self.pos, 9, 4), 2)
     #draws bullet to screen
 
 
@@ -163,12 +165,12 @@ pos = (cowboy.x, cowboy.y)
 bullets = []
 hit = 0
 
-def BulletCollision(bulletx, bullety, Rect):
-    #distance = math.sqrt((math.pow(enemyx - bulletx,2)) + (math.pow(enemyy - bullety,2)))
-    if Rect.collidepoint(bulletx, bullety):
-        return True
-    else:
-        return False
+def BulletCollision(rect1, rect2):
+    collide = pygame.Rect.colliderect(rect1, rect2)
+    if collide:
+        rect1.kill()
+
+
 
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
@@ -196,6 +198,7 @@ while running:
     cowboy.KeyStroke()
     knight.move(cowboy.x, cowboy.y)
     screen.fill((255, 255, 255))
+    #wipes page white
     cowboy.display()
 
     for bullet in bullets:
