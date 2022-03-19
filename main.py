@@ -32,7 +32,7 @@ class Character:  # this class handles most parts to do with the player
         self.y = y
         self.img = img
         self.vel = vel
-        self.rect = (self.x, self.y, 45, 70)
+        self.rect = pygame.Rect(self.x, self.y, 45, 70)
 
     # the constructor method allows for the player to have different attributes when called
 
@@ -71,8 +71,6 @@ class Character:  # this class handles most parts to do with the player
                     return self.y
                 else:
                     return self.y
-#        if event.type == pygame.KEYUP:
- #           print("Key released")
         # will change x and y co-ordinates to move player around screen.
         # added boundary so player cant move out of screen
 
@@ -97,7 +95,7 @@ class Enemy:
         self.y = y
         self.img = img
         self.vel = vel
-        self.rect = (self.x, self.y, 45, 70)
+        self.rect = pygame.Rect(self.x, self.y, 45, 70)
 
 
     def move(self, playerX, playerY):  # chase movement
@@ -145,6 +143,7 @@ class Projectile:
         self.bullet = pygame.transform.rotate(self.bullet, angle)
         #moves the rotation of the bullet to its trajectory path
         self.vel = vel
+        self.rect = ((*self.pos, 9, 4))
 
 
     def update(self):
@@ -165,12 +164,9 @@ pos = (cowboy.x, cowboy.y)
 bullets = []
 hit = 0
 
-def BulletCollision(rect1, rect2):
-    collide = pygame.Rect.colliderect(rect1, rect2)
-    if collide:
-        rect1.kill()
-
-
+def RectCollision(rect1, rect2):
+     return pygame.Rect.colliderect(rect1, rect2)
+     #returns true or false depending on if collision has happened
 
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
@@ -180,7 +176,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            bullets.append(Projectile(cowboy.x , cowboy.y, 2))
+            bullets.append(Projectile(cowboy.x , cowboy.y, 4))
         #allows for mouse button to be pressed down signalling a shot has been fired
 
 
@@ -188,16 +184,14 @@ while running:
         bullet.update()
         if not screen.get_rect().collidepoint(bullet.pos):
             bullets.remove(bullet)
-        #if BulletCollision(knight.x, knight.y, enemyImg.get_rect(center=(knight.x, knight.y))) == True:
-        #    bullets.remove(bullet)
-        #    hit += 1
-        #    print(hit)
+        # either updates bullets position or removes bullet if not on screen
 
-    #either updates bullets position or removes bullet if not on screen
+        if RectCollision(cowboy.rect, bullet.rect) == True:
+            print("hit")
 
     cowboy.KeyStroke()
     knight.move(cowboy.x, cowboy.y)
-    screen.fill((255, 255, 255))
+    screen.fill((50.2, 50.2, 50.2))
     #wipes page white
     cowboy.display()
 
