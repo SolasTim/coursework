@@ -1,38 +1,30 @@
 import pygame
-import Button
 
-#create display window
-SCREEN_HEIGHT = 500
-SCREEN_WIDTH = 800
+class Button:
+    def __init__(self, x, y, image, scale):
+        width = image.get_width()
+        height = image.get_height()
+        self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+        self.isClicked = False
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption('Button Demo')
+    def draw(self, screen):
+        action = False
+        pos = pygame.mouse.get_pos()
+        #gets the mouse position
 
-#load button images
-start_img = pygame.image.load('start_btn.png').convert_alpha()
-exit_img = pygame.image.load('exit_btn.png').convert_alpha()
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and self.isClicked == False:
+                self.isClicked = True
+                action = True
+        #checks whether the mouse is over a button and has been clicked
 
-#create button instances
-start_button = button.Button(100, 200, start_img, 0.8)
-exit_button = button.Button(450, 200, exit_img, 0.8)
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.isClicked == False
 
-#game loop
-run = True
-while run:
+        screen.blit(self.image, (self.rect.x, self.rect.y))
+        #draws button to screen
 
-	screen.fill((202, 228, 241))
+        return action
 
-	if start_button.draw(screen):
-		print('START')
-	if exit_button.draw(screen):
-		print('EXIT')
-
-	#event handler
-	for event in pygame.event.get():
-		#quit game
-		if event.type == pygame.QUIT:
-			run = False
-
-	pygame.display.update()
-
-pygame.quit()
