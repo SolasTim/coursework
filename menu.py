@@ -33,6 +33,43 @@ class Button:
 
         return action
 
+class TextBox:
+	def __init__(self, x, y, width, height, text = ''):
+		self.text = text
+		self.font = pygame.font.SysFont(None, 24)
+		self.img = self.font.render(self.text, True, (100, 200, 200))
+		self.rect = self.img.get_rect()
+		self.rect.topleft = (x, y)
+		self.isClicked = False
+
+	def draw(self, screen):
+		action = False
+		pos = pygame.mouse.get_pos()
+        #gets the mouse position
+		
+		if self.rect.collidepoint(pos):
+			if pygame.mouse.get_pressed()[0] == 1 and self.isClicked == False:
+				for event in pygame.event.get():
+					if event.type == KEYDOWN:
+						if event.key == K_BACKSPACE:
+							if len(self.text) > 0:
+								text = text[:-1]
+								#to be continued
+
+
+				self.isClicked = True
+				action = True
+        #checks whether the mouse is over a button and has been clicked
+		
+		if pygame.mouse.get_pressed()[0] == 0:
+			self.isClicked == False
+			
+		screen.blit(self.txt_screen, (self.rect.x, self.rect.y))
+        #draws button to screen
+		
+		return action
+
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Button Demo')
 
@@ -54,6 +91,7 @@ while run:
 		print('START')
 	if exit_button.draw(screen):
 		print('EXIT')
+		run = False
 
 	#event handler
 	for event in pygame.event.get():
