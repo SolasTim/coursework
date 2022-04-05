@@ -20,8 +20,8 @@ pygame.display.set_icon(icon)
 # player
 playerImg = pygame.image.load("cowboy.png")
 playerImg = pygame.transform.scale(playerImg, (46, 68))
-playerX = 380
-playerY = 260
+playerX = 100
+playerY = 500
 
 
 # sets the players attributes outside of the class. Will most likely change this
@@ -90,12 +90,15 @@ enemyY = 260
 
 class Enemy:
 
-    def __init__(self, x, y, img, vel):
+    def __init__(self, x, y, img, vel, health):
         self.x = x
         self.y = y
         self.img = img
         self.vel = vel
         self.rect = pygame.Rect(self.x, self.y, 45, 70)
+        self.health = health
+
+    
 
 
     def move(self, playerX, playerY):  # chase movement
@@ -159,10 +162,11 @@ class Projectile:
 
 
 cowboy = Character(playerX, playerY, playerImg, 5)
-knight = Enemy(enemyX, enemyY, enemyImg, 0.05)
+knight = Enemy(enemyX, enemyY, enemyImg, 0.05, 3)
 pos = (cowboy.x, cowboy.y)
 bullets = []
 hit = 0
+Kalive = True
 
 def RectCollision(rect1, rect2):
      return pygame.Rect.colliderect(rect1, rect2)
@@ -184,13 +188,20 @@ while running:
         bullet.update()
         if not screen.get_rect().collidepoint(bullet.pos):
             bullets.remove(bullet)
+        if knight.rect.collidepoint(bullet.pos):
+            print("hit")
+            bullets.remove(bullet)
+            knight.health -= 1
+            if knight.health == 0:
+                Kalive = False
+                print ("knight dead")
+
         # either updates bullets position or removes bullet if not on screen
 
-        if RectCollision(cowboy.rect, bullet.rect) == True:
-            print("hit")
+        #if RectCollision(cowboy.rect, bullet.rect) == True:
+            #print("hit")
 
     cowboy.KeyStroke()
-    knight.move(cowboy.x, cowboy.y)
     screen.fill((50.2, 50.2, 50.2))
     #wipes page white
     cowboy.display()
@@ -198,7 +209,9 @@ while running:
     for bullet in bullets:
         bullet.draw(screen)
 
-    knight.display()
+    if Kalive == True:
+        knight.move(cowboy.x, cowboy.y)
+        knight.display()
 
     clock.tick(60)
     pygame.display.update()
