@@ -9,20 +9,23 @@ clock = pygame.time.Clock()
 ScreenResX = 800
 ScreenResY = 600
 screen = pygame.display.set_mode((ScreenResX, ScreenResY))
-
+#sets the resolution of the screen aloowing it to be displayed in the main loop
 #allows screen resolution to be changed easily
 
 # Title and Icon
 pygame.display.set_caption("woah I don't know what im doing!")
+#title of window
 icon = pygame.image.load("knight.png")
+#sets the icon at the top of the screen
 pygame.display.set_icon(icon)
 
 # player
 playerImg = pygame.image.load("cowboy.png")
 playerImg = pygame.transform.scale(playerImg, (46, 68))
+#this formats the players sprite so it can be displayed onto the screen
 playerX = 100
 playerY = 500
-
+#sets players initial x and y co ordinated
 
 # sets the players attributes outside of the class. Will most likely change this
 
@@ -46,6 +49,7 @@ class Character:  # this class handles most parts to do with the player
                 if self.x <= 0:
                     self.x = 0
                     return self.x
+                    #stops player from moving off the screen
                 else:
                     return self.x
             if event.key == pygame.K_RIGHT:
@@ -78,8 +82,8 @@ class Character:  # this class handles most parts to do with the player
         screen.blit(self.img, (self.x, self.y))
         pygame.draw.rect(screen, (0,0,255), (self.x, self.y, 45, 70), 2)
 
-# Enemy
 
+# Enemy
 enemyImg = pygame.image.load("knight.png")
 enemyImg = pygame.transform.scale(enemyImg, (46, 68))
 enemyX = 380
@@ -95,11 +99,12 @@ class Enemy:
         self.y = y
         self.img = img
         self.vel = vel
-        self.rect = pygame.Rect(self.x, self.y, 45, 70)
+        self.rect = pygame.Rect(self.x, self.y, 46, 68)
         self.health = health
 
-    
-
+    def isclose(self, playerX, playerY ,distance):
+        return math.hypot(self.x - playerX,  self.y - playerY) < float(distance)
+        #this returns the distacne that the player is away from the enemy so when the player comes close enough the enemy will come towards the player
 
     def move(self, playerX, playerY):  # chase movement
         # Movement along x direction
@@ -112,7 +117,6 @@ class Enemy:
             self.y += self.vel
         elif self.y > playerY:
             self.y -= self.vel
-
         #moves enemy towards player
 
     def display(self):
@@ -162,9 +166,10 @@ class Projectile:
 
 
 cowboy = Character(playerX, playerY, playerImg, 5)
-knight = Enemy(enemyX, enemyY, enemyImg, 0.05, 3)
+knight = Enemy(enemyX, enemyY, enemyImg, 0.5, 3)
 pos = (cowboy.x, cowboy.y)
 bullets = []
+enemies = []
 hit = 0
 Kalive = True
 
@@ -183,7 +188,6 @@ while running:
             bullets.append(Projectile(cowboy.x , cowboy.y, 4))
         #allows for mouse button to be pressed down signalling a shot has been fired
 
-
     for bullet in bullets[:]:
         bullet.update()
         if not screen.get_rect().collidepoint(bullet.pos):
@@ -194,24 +198,22 @@ while running:
             knight.health -= 1
             if knight.health == 0:
                 Kalive = False
-                print ("knight dead")
+                print("knight dead")
 
-        # either updates bullets position or removes bullet if not on screen
-
-        #if RectCollision(cowboy.rect, bullet.rect) == True:
-            #print("hit")
+        #either updates bullets position or removes bullet if not on screen
 
     cowboy.KeyStroke()
     screen.fill((50.2, 50.2, 50.2))
     #wipes page white
     cowboy.display()
+    knight.display()
+
+    if Kalive == True:
+        if knight.isclose(cowboy.x, cowboy.y, 200):
+            knight.move(cowboy.x, cowboy.y)
 
     for bullet in bullets:
         bullet.draw(screen)
-
-    if Kalive == True:
-        knight.move(cowboy.x, cowboy.y)
-        knight.display()
 
     clock.tick(60)
     pygame.display.update()
