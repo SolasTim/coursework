@@ -164,6 +164,13 @@ class Projectile:
         pygame.draw.rect(screen, (0, 255, 0), (*self.pos, 9, 4), 2)
     #draws bullet to screen
 
+class item:
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
 
 cowboy = Character(playerX, playerY, playerImg, 5)
 knight = Enemy(enemyX, enemyY, enemyImg, 0.5, 3)
@@ -188,6 +195,7 @@ while running:
             bullets.append(Projectile(cowboy.x , cowboy.y, 4))
         #allows for mouse button to be pressed down signalling a shot has been fired
 
+
     for bullet in bullets[:]:
         bullet.update()
         if not screen.get_rect().collidepoint(bullet.pos):
@@ -199,18 +207,18 @@ while running:
             if knight.health == 0:
                 Kalive = False
                 print("knight dead")
-
         #either updates bullets position or removes bullet if not on screen
 
     cowboy.KeyStroke()
     screen.fill((50.2, 50.2, 50.2))
     #wipes page white
     cowboy.display()
-    knight.display()
+    #knight.display()
 
     if Kalive == True:
         if knight.isclose(cowboy.x, cowboy.y, 200):
             knight.move(cowboy.x, cowboy.y)
+            knight.display()
 
     for bullet in bullets:
         bullet.draw(screen)
