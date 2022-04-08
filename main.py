@@ -84,8 +84,10 @@ class Character:  # this class handles most parts to do with the player
 
 
 # Enemy
-enemyImg = pygame.image.load("knight.png")
-enemyImg = pygame.transform.scale(enemyImg, (46, 68))
+knightImg = pygame.image.load("knight.png")
+goblinImg = pygame.image.load("goblin.png")
+knightImg = pygame.transform.scale(knightImg, (46, 68))
+goblinImg = pygame.transform.scale(goblinImg, (46, 68))
 enemyX = 380
 enemyY = 260
 
@@ -99,10 +101,9 @@ class Enemy:
         self.y = y
         self.img = img
         self.vel = vel
-        self.rect = pygame.Rect(self.x, self.y, 46, 68)
         self.health = health
 
-    def isclose(self, playerX, playerY ,distance):
+    def isclose(self, playerX, playerY, distance):
         return math.hypot(self.x - playerX,  self.y - playerY) < float(distance)
         #this returns the distacne that the player is away from the enemy so when the player comes close enough the enemy will come towards the player
 
@@ -118,6 +119,11 @@ class Enemy:
         elif self.y > playerY:
             self.y -= self.vel
         #moves enemy towards player
+
+    def update(self):
+            self.rect = pygame.Rect(self.x, self.y, 46, 68)
+            print(self.rect)
+
 
     def display(self):
         screen.blit(self.img, (self.x, self.y))
@@ -150,12 +156,13 @@ class Projectile:
         self.bullet = pygame.transform.rotate(self.bullet, angle)
         #moves the rotation of the bullet to its trajectory path
         self.vel = vel
-        self.rect = ((*self.pos, 9, 4))
 
 
     def update(self):
         self.pos = (self.pos[0] + self.dir[0] * self.vel,
                     self.pos[1] + self.dir[1] * self.vel)
+        self.rect = ((*self.pos, 9, 4))
+        #print(self.rect)
     #updates bullets position on the screen
 
     def draw(self, surf):
@@ -173,26 +180,25 @@ class item:
 
 
 cowboy = Character(playerX, playerY, playerImg, 5)
-knight = Enemy(enemyX, enemyY, enemyImg, 0.5, 3)
+goblin = Enemy(enemyX, enemyY, goblinImg, 2, 3)
+knight = Enemy(enemyX, enemyY, knightImg, 0.5, 5)
 pos = (cowboy.x, cowboy.y)
 bullets = []
 enemies = []
 hit = 0
-Kalive = True
-
-def RectCollision(rect1, rect2):
-     return pygame.Rect.colliderect(rect1, rect2)
-     #returns true or false depending on if collision has happened
+KA = True
+GA = True
 
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
+# game loop contains
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            bullets.append(Projectile(cowboy.x , cowboy.y, 4))
+            bullets.append(Projectile(cowboy.x, cowboy.y, 4))
         #allows for mouse button to be pressed down signalling a shot has been fired
 
 
@@ -200,25 +206,50 @@ while running:
         bullet.update()
         if not screen.get_rect().collidepoint(bullet.pos):
             bullets.remove(bullet)
-        if knight.rect.collidepoint(bullet.pos):
+        if knight.rect.colliderect(bullet.rect):
+            #checks whether a collison has occured between the bullet and enemy
             print("hit")
             bullets.remove(bullet)
+            #this removes bullet from screen
             knight.health -= 1
             if knight.health == 0:
-                Kalive = False
+                KA = False
+                #KA is checks the alive state of the goblin
                 print("knight dead")
+                #this is testing to see if the knight has died
+        if goblin.rect.colliderect(bullet.rect):
+            print("hit")
+            bullets.remove(bullet)
+            goblin.health -= 1
+            if goblin.health == 0:
+                GA = False
+                print("knight dead")
+        #This handles the goblins collisions and health
         #either updates bullets position or removes bullet if not on screen
+
 
     cowboy.KeyStroke()
     screen.fill((50.2, 50.2, 50.2))
-    #wipes page white
+    #wipes page
     cowboy.display()
-    #knight.display()
 
-    if Kalive == True:
+    if KA == True:
+        knight.update()
         if knight.isclose(cowboy.x, cowboy.y, 200):
             knight.move(cowboy.x, cowboy.y)
-            knight.display()
+        knight.display()
+    elif KA == False:
+        knight.rect = pygame.Rect(0, 0, 0, 0)
+        #this elif statement will just set the knights rect to 0 size so it appears dead
+
+    if GA == True:
+        goblin.update()
+        if goblin.isclose(cowboy.x, cowboy.y, 300):
+            goblin.move(cowboy.x, cowboy.y)
+        goblin.display()
+    elif GA == False:
+        goblin.rect = pygame.Rect(0, 0, 0, 0)
+        #this elif statement will just set the knights rect to 0 size so it appears dead
 
     for bullet in bullets:
         bullet.draw(screen)
