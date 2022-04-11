@@ -5,6 +5,12 @@ import math
 pygame.init()
 clock = pygame.time.Clock()
 
+#creating time delay
+time_delay = 500
+#0.5 seconds
+time_event = pygame.USEREVENT + 1
+pygame.time.set_timer(time_event, time_delay)
+
 # create screen
 ScreenResX = 800
 ScreenResY = 600
@@ -122,7 +128,7 @@ class Enemy:
 
     def update(self):
             self.rect = pygame.Rect(self.x, self.y, 46, 68)
-            print(self.rect)
+            #print(self.rect)
 
 
     def display(self):
@@ -136,25 +142,48 @@ class Enemy:
 
 class Projectile:
 
-    def __init__(self, x, y, vel):
-        self.pos = (x, y)
-        #position of bullet
-        mx, my = pygame.mouse.get_pos()
-        #get position of mouse on screen
-        self.dir = (mx - x, my - y)
-        #direction of bullet
-        length = math.hypot(*self.dir)
-        if length == 0.0:
-            self.dir = (0, -1)
-        else:
-            self.dir = (self.dir[0] / length, self.dir[1] / length)
-        angle = math.degrees(math.atan2(-self.dir[1], self.dir[0]))
+    def __init__(self, x, y, vel, isPlayer, pX, pY):
+        if isPlayer == True:
+            #this statement will execute when the player is shooting
+            mx, my = pygame.mouse.get_pos()
+            # get position of mouse on screen
+            self.pos = (x, y)
+            # position of bullet
+            self.dir = (mx - x, my - y)
+            # direction of bullet
+            length = math.hypot(*self.dir)
+            if length == 0.0:
+                self.dir = (0, -1)
+            else:
+                self.dir = (self.dir[0] / length, self.dir[1] / length)
+            angle = math.degrees(math.atan2(-self.dir[1], self.dir[0]))
 
-        self.bullet = pygame.Surface((7,2)).convert_alpha()
-        self.bullet.fill((0, 0, 0))
-        #colour of bullet
-        self.bullet = pygame.transform.rotate(self.bullet, angle)
-        #moves the rotation of the bullet to its trajectory path
+            self.bullet = pygame.Surface((7, 2)).convert_alpha()
+            self.bullet.fill((0, 0, 0))
+            # colour of bullet
+            self.bullet = pygame.transform.rotate(self.bullet, angle)
+            # moves the rotation of the bullet to its trajectory path
+
+        elif isPlayer == False:
+            # this statement will execute when the enemy is shooting
+            #this condition is for when enemies shoot the player
+            self.pos = (x, y)
+            # position of bullet
+            self.dir = (pX - x, pY - y)
+            # direction of bullet
+            length = math.hypot(*self.dir)
+            if length == 0.0:
+                self.dir = (0, -1)
+            else:
+                self.dir = (self.dir[0] / length, self.dir[1] / length)
+            angle = math.degrees(math.atan2(-self.dir[1], self.dir[0]))
+
+            self.bullet = pygame.Surface((7, 2)).convert_alpha()
+            self.bullet.fill((0, 0, 0))
+            # colour of bullet
+            self.bullet = pygame.transform.rotate(self.bullet, angle)
+            # moves the rotation of the bullet to its trajectory path
+
         self.vel = vel
 
 
@@ -176,11 +205,15 @@ class item:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.rect = self.rect = ((*self.pos, 10, 10))
+
+    def draw(self):
+        screen.blit(self.img, (self.x, self.y))
 
 
 
 cowboy = Character(playerX, playerY, playerImg, 5)
-goblin = Enemy(enemyX, enemyY, goblinImg, 2, 3)
+goblin = Enemy(enemyX + 30, enemyY - 50, goblinImg, 2, 3)
 knight = Enemy(enemyX, enemyY, knightImg, 0.5, 5)
 pos = (cowboy.x, cowboy.y)
 bullets = []
@@ -191,15 +224,19 @@ GA = True
 
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
-# game loop contains
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            bullets.append(Projectile(cowboy.x, cowboy.y, 4))
-        #allows for mouse button to be pressed down signalling a shot has been fired
+            bullets.append(Projectile(cowboy.x, cowboy.y, 4, True, cowboy.x, cowboy.y))
+        if event.type == time_event and KA == True:
+            bullets.append(Projectile(knight.x -45, knight.y, 4, False, cowboy.x, cowboy.y))
+
+
+
+#allows for mouse button to be pressed down signalling a shot has been fired
 
 
     for bullet in bullets[:]:
@@ -224,6 +261,7 @@ while running:
             if goblin.health == 0:
                 GA = False
                 print("knight dead")
+
         #This handles the goblins collisions and health
         #either updates bullets position or removes bullet if not on screen
 
