@@ -148,6 +148,7 @@ class Enemy:
 class Projectile:
 
     def __init__(self, x, y, vel, isPlayer, pX, pY):
+        self.isPlayer = isPlayer
         if isPlayer == True:
             # this statement will execute when the player is shooting
             mx, my = pygame.mouse.get_pos()
@@ -170,7 +171,6 @@ class Projectile:
             # moves the rotation of the bullet to its trajectory path
 
         elif isPlayer == False:
-            # this statement will execute when the enemy is shooting
             # this condition is for when enemies shoot the player
             self.pos = (x, y)
             # position of bullet
@@ -209,6 +209,7 @@ class Projectile:
 #    dist=math.hypot(objectX - targetX, objectY - targetY)
 #    print(dist)
 #halo(10, 10, 0, 0)
+##HAHAHAHA BYE CODE U ARE USELESS NOW AHAHAHAHAHAHA
 
 class item:
 
@@ -247,7 +248,7 @@ while running:
         bullet.update()
         if not screen.get_rect().collidepoint(bullet.pos):
             bullets.remove(bullet)
-        if knight.rect.colliderect(bullet.rect):
+        if knight.rect.colliderect(bullet.rect) and bullet.isPlayer == True:
             # checks whether a collision has occured between the bullet and enemy
             print("hit")
             bullets.remove(bullet)
@@ -268,7 +269,7 @@ while running:
                 GA = False
                 # GA is checks the alive state of the goblin
                 print("knight dead")
-        if cowboy.rect.colliderect(bullet.rect):
+        if cowboy.rect.colliderect(bullet.rect) and bullet.isPlayer == False:
             #checks collision between player and bullet
             print("players hit")
             bullets.remove(bullet)
