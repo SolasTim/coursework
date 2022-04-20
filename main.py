@@ -5,6 +5,9 @@ import math
 pygame.init()
 clock = pygame.time.Clock()
 
+# items collected counter
+items = 0
+
 # creating time delay
 time_delay = 500
 # 0.5 seconds
@@ -32,9 +35,12 @@ playerImg = pygame.transform.scale(playerImg, (46, 68))
 # this formats the players sprite so it can be displayed onto the screen
 playerX = 100
 playerY = 500
-
-
 # sets players initial x and y co ordinated
+
+#item
+itemImg = pygame.image.load("chest.png")
+itemImg = pygame.transform.scale(itemImg, (25, 30))
+#sets chests sprite
 
 # sets the players attributes outside of the class. Will most likely change this
 
@@ -211,17 +217,25 @@ class Projectile:
 #halo(10, 10, 0, 0)
 ##HAHAHAHA BYE CODE U ARE USELESS NOW AHAHAHAHAHAHA
 
-class item:
+class Item:
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, img):
         self.x = x
         self.y = y
-        self.rect = self.rect = ((self.x, self.y, 10, 10))
+        self.img = img
+        # base class sets the x,y and image
+
+    def update(self):
+        self.rect = pygame.Rect(self.x, self.y, 25, 30)
+        # update method updates the rect of the object
 
     def draw(self):
         screen.blit(self.img, (self.x, self.y))
+        # draw method draws the sprite to the screen
+        # at given coordinates
 
 
+chest1 = Item(80, 80, itemImg)
 cowboy = Character(playerX, playerY, playerImg, 5)
 goblin = Enemy(enemyX + 30, enemyY - 50, goblinImg, 2, 3)
 knight = Enemy(enemyX, enemyY, knightImg, 0.5, 5)
@@ -231,6 +245,7 @@ enemies = []
 hit = 0
 KA = True
 GA = True
+collected1 = False
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
 running = True
@@ -250,6 +265,7 @@ while running:
             bullets.remove(bullet)
         if knight.rect.colliderect(bullet.rect) and bullet.isPlayer == True:
             # checks whether a collision has occured between the bullet and enemy
+            # also checks to see what object has shot it to prevent shooting itself
             print("hit")
             bullets.remove(bullet)
             # this removes bullet from screen
@@ -270,18 +286,34 @@ while running:
                 # GA is checks the alive state of the goblin
                 print("knight dead")
         if cowboy.rect.colliderect(bullet.rect) and bullet.isPlayer == False:
-            #checks collision between player and bullet
+            # checks collision between player and bullet
             print("players hit")
             bullets.remove(bullet)
 
         # This handles the goblins collisions and health
         # either updates bullets position or removes bullet if not on screen
 
+
     cowboy.KeyStroke()
     screen.fill((50.2, 50.2, 50.2))
     # wipes page
     cowboy.display()
     cowboy.update()
+    chest1.update()
+
+    if cowboy.rect.colliderect(chest1.rect) and collected1 == False:
+        # checks if a collision between the player and item has occurred
+        # and if
+        chest1.update()
+
+        collected1 = True
+        items += 1
+        print(items)
+
+    elif collected1 == False:
+        chest1.draw()
+
+
 
     if KA == True:
         knight.update()
