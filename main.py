@@ -46,8 +46,49 @@ itemImg = pygame.image.load("chest.png")
 itemImg = pygame.transform.scale(itemImg, (25, 30))
 #sets chests sprite
 
-# sets the players attributes outside of the class. Will most likely change this
 
+class Screen():
+    def __init__(self, title, fill, width = 600, height = 600):
+        self.title = title
+        # title of the screen so i can differentiate between them
+        self.width = width
+        self.height = height
+        # dimensions of screen which are set to a default 600x 600
+        # unless I want them different then i can just change values when creating object
+        self.fill = fill
+        # set what will refresh each time
+        self.current = False
+        # decides which screen should be showing, if this is switched
+        # to true it will show that screen
+
+    def MakeCurrent(self):
+        pygame.display.set_caption(self.title)
+        # sets the caption of the current screen
+        self.current = True
+        # switches the screen that is being shown
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        # sets dimension of screen
+
+    def EndCurrent(self):
+        self.current = False
+        # makes previous screen stop showing
+
+    def CheckUpdate(self):
+        return self.current
+        #checks what screen needs to be showing at that time
+
+    def ScreenUpdate(self, isGame):
+        if self.current and isGame == False:
+            # the isGame parameter is nececarry as the game needs to blit
+            # a picture not wipe a single colour
+            self.screen.fill(self.fill)
+            # wipes screen to one colour
+        elif isGame == True and isGame == True:
+            self.screen.blit(map, [0, 0])
+            # displays the map onto the screen
+
+    def ReturnTitle(self):
+        return self.screen
 
 
 class Character:  # this class handles most parts to do with the player
@@ -237,12 +278,9 @@ class Item:
         # draw method draws the sprite to the screen
         # at given coordinates
 
-class walls:
-    def __init__(self):
-        pass
 
 chest1 = Item(140, 30, itemImg)
-cowboy = Character(playerX, playerY, playerImg, 5)
+cowboy = Character(playerX, playerY, playerImg, 10)
 goblin = Enemy(goblinX, goblinY, goblinImg, 2, 3)
 knight = Enemy(knightX, knightY, knightImg, 0.5, 5)
 pos = (cowboy.x, cowboy.y)
@@ -252,99 +290,114 @@ hit = 0
 KA = True
 GA = True
 collected1 = False
+game = Screen("game", map)
+menu = Screen("menu", (50.5, 50.5, 50.5))
+leaderboard = Screen("leaderboard", (50.5, 50.5, 50.5))
+game.MakeCurrent()
+# sets this as the first screen
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
 running = True
 while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            bullets.append(Projectile(cowboy.x, cowboy.y, 4, True, cowboy.x, cowboy.y))
-        if event.type == time_event and KA == True and knight.isclose(cowboy.x, cowboy.y, 200):
-            bullets.append(Projectile(knight.x - 45, knight.y, 1, False, cowboy.x, cowboy.y))
-    # allows for mouse button to be pressed down signalling a shot has been fired
-
-    for bullet in bullets[:]:
-        bullet.update()
-        if not screen.get_rect().collidepoint(bullet.pos):
-            bullets.remove(bullet)
-        if knight.rect.colliderect(bullet.rect) and bullet.isPlayer == True:
-            # checks whether a collision has occured between the bullet and enemy
-            # also checks to see what object has shot it to prevent shooting itself
-            print("hit")
-            bullets.remove(bullet)
-            # this removes bullet from screen
-            knight.health -= 1
-            if knight.health == 0:
-                KA = False
-                # KA is checks the alive state of the knight
-                print("knight dead")
-                # this is testing to see if the knight has died
-        if goblin.rect.colliderect(bullet.rect):
-            # checks whether a collision has occured between the bullet and enemy
-            print("hit")
-            bullets.remove(bullet)
-            # this removes bullet from screen
-            goblin.health -= 1
-            if goblin.health == 0:
-                GA = False
-                # GA is checks the alive state of the goblin
-                print("knight dead")
-        if cowboy.rect.colliderect(bullet.rect) and bullet.isPlayer == False:
-            # checks collision between player and bullet
-            print("players hit")
-            bullets.remove(bullet)
-
-        # This handles the goblins collisions and health
-        # either updates bullets position or removes bullet if not on screen
 
 
-    cowboy.KeyStroke()
+    if game.CheckUpdate():
+        game.ScreenUpdate(True)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                bullets.append(Projectile(cowboy.x, cowboy.y, 4, True, cowboy.x, cowboy.y))
+            if event.type == time_event and KA == True and knight.isclose(cowboy.x, cowboy.y, 100):
+                bullets.append(Projectile(knight.x - 45, knight.y, 1, False, cowboy.x, cowboy.y))
+        # allows for mouse button to be pressed down signalling a shot has been fired
 
-    screen.blit(map, [0,0])
-    # places map onto screen
+        for bullet in bullets[:]:
+            bullet.update()
+            if not screen.get_rect().collidepoint(bullet.pos):
+                bullets.remove(bullet)
+            if knight.rect.colliderect(bullet.rect) and bullet.isPlayer == True:
+                # checks whether a collision has occured between the bullet and enemy
+                # also checks to see what object has shot it to prevent shooting itself
+                print("hit")
+                bullets.remove(bullet)
+                # this removes bullet from screen
+                knight.health -= 1
+                if knight.health == 0:
+                    KA = False
+                    # KA is checks the alive state of the knight
+                    print("knight dead")
+                    # this is testing to see if the knight has died
+            if goblin.rect.colliderect(bullet.rect):
+                # checks whether a collision has occured between the bullet and enemy
+                print("hit")
+                bullets.remove(bullet)
+                # this removes bullet from screen
+                goblin.health -= 1
+                if goblin.health == 0:
+                    GA = False
+                    # GA is checks the alive state of the goblin
+                    print("knight dead")
+            if cowboy.rect.colliderect(bullet.rect) and bullet.isPlayer == False:
+                # checks collision between player and bullet
+                print("players hit")
+                bullets.remove(bullet)
 
-    cowboy.display()
-    cowboy.update()
-    chest1.update()
+            # This handles the goblins collisions and health
+            # either updates bullets position or removes bullet if not on screen
 
-    if cowboy.rect.colliderect(chest1.rect) and collected1 == False:
-        # checks if a collision between the player and item has occurred
-        # and if it has already been collide with
+
+
+        # places map onto screen
+
+        cowboy.KeyStroke()
+        cowboy.display()
+        cowboy.update()
         chest1.update()
-        collected1 = True
-        items += 1
-        print(items)
 
-    elif collected1 == False:
-        chest1.draw()
+        if cowboy.rect.colliderect(chest1.rect) and collected1 == False:
+            # checks if a collision between the player and item has occurred
+            # and if it has already been collide with
+            chest1.update()
+            collected1 = True
+            items += 1
+            print(items)
 
-    #for i in objects:
+        elif collected1 == False:
+            chest1.draw()
 
 
+        if KA == True:
+            knight.update()
+            if knight.isclose(cowboy.x, cowboy.y, 200):
+                knight.move(cowboy.x, cowboy.y)
+            knight.display()
+        elif KA == False:
+            knight.rect = pygame.Rect(0, 0, 0, 0)
+            # this elif statement will just set the knights rect to 0 size so it appears dead
 
+        if GA == True:
+            goblin.update()
+            if goblin.isclose(cowboy.x, cowboy.y, 150):
+                goblin.move(cowboy.x, cowboy.y)
+            goblin.display()
+        elif GA == False:
+            goblin.rect = pygame.Rect(0, 0, 0, 0)
+            # this elif statement will just set the knights rect to 0 size so it appears dead
 
-    if KA == True:
-        knight.update()
-        if knight.isclose(cowboy.x, cowboy.y, 100):
-            knight.move(cowboy.x, cowboy.y)
-        knight.display()
-    elif KA == False:
-        knight.rect = pygame.Rect(0, 0, 0, 0)
-        # this elif statement will just set the knights rect to 0 size so it appears dead
+        for bullet in bullets:
+            bullet.draw(screen)
 
-    if GA == True:
-        goblin.update()
-        if goblin.isclose(cowboy.x, cowboy.y, 150):
-            goblin.move(cowboy.x, cowboy.y)
-        goblin.display()
-    elif GA == False:
-        goblin.rect = pygame.Rect(0, 0, 0, 0)
-        # this elif statement will just set the knights rect to 0 size so it appears dead
+        clock.tick(60)
 
-    for bullet in bullets:
-        bullet.draw(screen)
+        if items >= 1:
+            leaderboard.MakeCurrent()
+            game.EndCurrent()
 
-    clock.tick(60)
+    elif leaderboard.CheckUpdate():
+        leaderboard.ScreenUpdate(False)
+        print("this where leaderboard be's")
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
     pygame.display.update()
