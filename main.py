@@ -16,7 +16,7 @@ pygame.time.set_timer(time_event, time_delay)
 # sets timer for when an event has happened and how long it should go for.
 
 # create screen
-ScreenResX = 800
+ScreenResX = 600
 ScreenResY = 600
 screen = pygame.display.set_mode((ScreenResX, ScreenResY))
 # sets the resolution of the screen allowing it to be displayed in the main loop
@@ -29,9 +29,12 @@ icon = pygame.image.load("knight.png")
 # sets the icon at the top of the screen
 pygame.display.set_icon(icon)
 
+#map
+map = pygame.image.load("map.png").convert()
+
 # player
 playerImg = pygame.image.load("cowboy.png")
-playerImg = pygame.transform.scale(playerImg, (46, 68))
+playerImg = pygame.transform.scale(playerImg, (30, 40))
 # this formats the players sprite so it can be displayed onto the screen
 playerX = 100
 playerY = 500
@@ -43,6 +46,8 @@ itemImg = pygame.transform.scale(itemImg, (25, 30))
 #sets chests sprite
 
 # sets the players attributes outside of the class. Will most likely change this
+
+
 
 class Character:  # this class handles most parts to do with the player
     def __init__(self, x, y, img, vel):
@@ -69,8 +74,8 @@ class Character:  # this class handles most parts to do with the player
             if event.key == pygame.K_RIGHT:
                 # picks up when right key is pressed
                 self.x += self.vel
-                if self.x >= (ScreenResX - 46):
-                    self.x = ScreenResX - 46
+                if self.x >= (ScreenResX - 30):
+                    self.x = ScreenResX - 30
                 else:
                     return self.x
             if event.key == pygame.K_UP:
@@ -84,8 +89,8 @@ class Character:  # this class handles most parts to do with the player
             if event.key == pygame.K_DOWN:
                 # picks up when down key is pressed
                 self.y += self.vel
-                if self.y >= (ScreenResY - 68):
-                    self.y = ScreenResY - 68
+                if self.y >= (ScreenResY - 40):
+                    self.y = ScreenResY - 40
                     return self.y
                 else:
                     return self.y
@@ -93,19 +98,19 @@ class Character:  # this class handles most parts to do with the player
         # added boundary so player cant move out of screen
 
     def update(self):
-        self.rect = pygame.Rect(self.x, self.y, 46, 68)
+        self.rect = pygame.Rect(self.x, self.y, 30, 40)
 
 
     def display(self):
         screen.blit(self.img, (self.x, self.y))
-        pygame.draw.rect(screen, (0, 0, 255), (self.x, self.y, 45, 70), 2)
+        pygame.draw.rect(screen, (0, 0, 255), (self.x, self.y, 30, 40), 2)
 
 
 # Enemy
 knightImg = pygame.image.load("knight.png")
 goblinImg = pygame.image.load("goblin.png")
-knightImg = pygame.transform.scale(knightImg, (46, 68))
-goblinImg = pygame.transform.scale(goblinImg, (46, 68))
+knightImg = pygame.transform.scale(knightImg, (30, 40))
+goblinImg = pygame.transform.scale(goblinImg, (30, 40))
 enemyX = 380
 enemyY = 260
 
@@ -140,12 +145,12 @@ class Enemy:
         # moves enemy towards player
 
     def update(self):
-        self.rect = pygame.Rect(self.x, self.y, 46, 68)
+        self.rect = pygame.Rect(self.x, self.y, 30, 40)
         # print(self.rect)
 
     def display(self):
         screen.blit(self.img, (self.x, self.y))
-        pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, 45, 70), 2)
+        pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, 30, 40), 2)
         # unsure why self.rect doesnt work but calling its var does
 
 
@@ -170,7 +175,7 @@ class Projectile:
                 self.dir = (self.dir[0] / length, self.dir[1] / length)
             angle = math.degrees(math.atan2(-self.dir[1], self.dir[0]))
 
-            self.bullet = pygame.Surface((7, 2)).convert_alpha()
+            self.bullet = pygame.Surface((4, 1)).convert_alpha()
             self.bullet.fill((0, 0, 0))
             # colour of bullet
             self.bullet = pygame.transform.rotate(self.bullet, angle)
@@ -189,7 +194,7 @@ class Projectile:
                 self.dir = (self.dir[0] / length, self.dir[1] / length)
             angle = math.degrees(math.atan2(-self.dir[1], self.dir[0]))
 
-            self.bullet = pygame.Surface((7, 2)).convert_alpha()
+            self.bullet = pygame.Surface((4, 1)).convert_alpha()
             self.bullet.fill((0, 0, 0))
             # colour of bullet
             self.bullet = pygame.transform.rotate(self.bullet, angle)
@@ -200,7 +205,7 @@ class Projectile:
     def update(self):
         self.pos = (self.pos[0] + self.dir[0] * self.vel,
                     self.pos[1] + self.dir[1] * self.vel)
-        self.rect = ((*self.pos, 9, 4))
+        self.rect = ((*self.pos, 7, 2))
         # print(self.rect)
 
     # updates bullets position on the screen
@@ -211,11 +216,6 @@ class Projectile:
         pygame.draw.rect(screen, (0, 255, 0), (*self.pos, 9, 4), 2)
     # draws bullet to screen
 
-#def halo(targetX, targetY, objectX, objectY):
-#    dist=math.hypot(objectX - targetX, objectY - targetY)
-#    print(dist)
-#halo(10, 10, 0, 0)
-##HAHAHAHA BYE CODE U ARE USELESS NOW AHAHAHAHAHAHA
 
 class Item:
 
@@ -234,6 +234,9 @@ class Item:
         # draw method draws the sprite to the screen
         # at given coordinates
 
+class walls:
+    def __init__(self):
+        pass
 
 chest1 = Item(80, 80, itemImg)
 cowboy = Character(playerX, playerY, playerImg, 5)
@@ -242,6 +245,8 @@ knight = Enemy(enemyX, enemyY, knightImg, 0.5, 5)
 pos = (cowboy.x, cowboy.y)
 bullets = []
 enemies = []
+#objects = [cowboy.rect, goblin.rect, knight.rect]
+
 hit = 0
 KA = True
 GA = True
@@ -295,23 +300,27 @@ while running:
 
 
     cowboy.KeyStroke()
-    screen.fill((50.2, 50.2, 50.2))
-    # wipes page
+
+    screen.blit(map, [0,0])
+    # places map onto screen
+
     cowboy.display()
     cowboy.update()
     chest1.update()
 
     if cowboy.rect.colliderect(chest1.rect) and collected1 == False:
         # checks if a collision between the player and item has occurred
-        # and if
+        # and if it has already been collide with
         chest1.update()
-
         collected1 = True
         items += 1
         print(items)
 
     elif collected1 == False:
         chest1.draw()
+
+    #for i in objects:
+
 
 
 
