@@ -29,15 +29,16 @@ icon = pygame.image.load("knight.png")
 # sets the icon at the top of the screen
 pygame.display.set_icon(icon)
 
-#map
+# map
 map = pygame.image.load("map.png").convert()
+# loads the image so its usable by pygame
 
 # player
 playerImg = pygame.image.load("cowboy.png")
 playerImg = pygame.transform.scale(playerImg, (30, 40))
 # this formats the players sprite so it can be displayed onto the screen
-playerX = 100
-playerY = 500
+playerX = 20
+playerY = 550
 # sets players initial x and y co ordinated
 
 #item
@@ -111,9 +112,11 @@ knightImg = pygame.image.load("knight.png")
 goblinImg = pygame.image.load("goblin.png")
 knightImg = pygame.transform.scale(knightImg, (30, 40))
 goblinImg = pygame.transform.scale(goblinImg, (30, 40))
-enemyX = 380
-enemyY = 260
-
+knightX = 360
+knightY = 550
+goblinX = 150
+goblinY = 120
+# This sets the coordinates and relevant images for each enemy
 
 # same as player class for now will again most likely change
 
@@ -238,15 +241,13 @@ class walls:
     def __init__(self):
         pass
 
-chest1 = Item(80, 80, itemImg)
+chest1 = Item(140, 30, itemImg)
 cowboy = Character(playerX, playerY, playerImg, 5)
-goblin = Enemy(enemyX + 30, enemyY - 50, goblinImg, 2, 3)
-knight = Enemy(enemyX, enemyY, knightImg, 0.5, 5)
+goblin = Enemy(goblinX, goblinY, goblinImg, 2, 3)
+knight = Enemy(knightX, knightY, knightImg, 0.5, 5)
 pos = (cowboy.x, cowboy.y)
 bullets = []
 enemies = []
-#objects = [cowboy.rect, goblin.rect, knight.rect]
-
 hit = 0
 KA = True
 GA = True
@@ -326,7 +327,7 @@ while running:
 
     if KA == True:
         knight.update()
-        if knight.isclose(cowboy.x, cowboy.y, 200):
+        if knight.isclose(cowboy.x, cowboy.y, 100):
             knight.move(cowboy.x, cowboy.y)
         knight.display()
     elif KA == False:
@@ -335,7 +336,7 @@ while running:
 
     if GA == True:
         goblin.update()
-        if goblin.isclose(cowboy.x, cowboy.y, 300):
+        if goblin.isclose(cowboy.x, cowboy.y, 150):
             goblin.move(cowboy.x, cowboy.y)
         goblin.display()
     elif GA == False:
