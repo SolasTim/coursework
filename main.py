@@ -91,6 +91,20 @@ class Screen():
         return self.screen
 
 
+class text:
+  def __init__(self, font, width = 60, height = 200):
+    self.font = pygame.font.sysfont(None, 48)
+    #sets font as no italic and size 48
+    self.width = width
+    self.height = height
+
+  def getkeys(self):
+    for event in pygame.event.get():
+      press = event.type
+    
+    
+  
+
 class Character:  # this class handles most parts to do with the player
     def __init__(self, x, y, img, vel):
         self.x = x
@@ -151,12 +165,16 @@ class Character:  # this class handles most parts to do with the player
 # Enemy
 knightImg = pygame.image.load("knight.png")
 goblinImg = pygame.image.load("goblin.png")
+ghostImg = pygame.image.load("knight.png")
 knightImg = pygame.transform.scale(knightImg, (30, 40))
 goblinImg = pygame.transform.scale(goblinImg, (30, 40))
+ghostImg = pygame.transform.scale(ghostImg, (30, 40))
 knightX = 360
 knightY = 550
 goblinX = 150
 goblinY = 120
+ghostX = 200
+ghostY = 480
 # This sets the coordinates and relevant images for each enemy
 
 # same as player class for now will again most likely change
@@ -280,16 +298,24 @@ class Item:
 
 
 chest1 = Item(140, 30, itemImg)
+chest2 = Item(470 ,430, itemImg)
+chest3 = Item(490, 170, itemImg)
 cowboy = Character(playerX, playerY, playerImg, 10)
 goblin = Enemy(goblinX, goblinY, goblinImg, 2, 3)
 knight = Enemy(knightX, knightY, knightImg, 0.5, 5)
+ghost = Enemy(ghostX, ghostY, ghostImg, 2, 4)
 pos = (cowboy.x, cowboy.y)
 bullets = []
-enemies = []
 hit = 0
 KA = True
+#knight alvie
 GA = True
+#goblin alvive
+HA = True
+#ghost alive
 collected1 = False
+collected2 = False
+collected3 = False
 game = Screen("game", map)
 menu = Screen("menu", (50.5, 50.5, 50.5))
 leaderboard = Screen("leaderboard", (50.5, 50.5, 50.5))
@@ -337,7 +363,18 @@ while running:
                 if goblin.health == 0:
                     GA = False
                     # GA is checks the alive state of the goblin
-                    print("knight dead")
+                    print("goblin dead")
+                  
+            if ghost.rect.colliderect(bullet.rect):
+                # checks whether a collision has occured between the bullet and enemy
+                print("hit")
+                bullets.remove(bullet)
+                # this removes bullet from screen
+                ghost.health -= 1
+                if ghost.health == 0:
+                    HA = False
+                    # GA is checks the alive state of the goblin
+                    print("ghost dead")
             if cowboy.rect.colliderect(bullet.rect) and bullet.isPlayer == False:
                 # checks collision between player and bullet
                 print("players hit")
@@ -354,6 +391,8 @@ while running:
         cowboy.display()
         cowboy.update()
         chest1.update()
+        chest2.update()
+        chest3.update()
 
         if cowboy.rect.colliderect(chest1.rect) and collected1 == False:
             # checks if a collision between the player and item has occurred
@@ -365,6 +404,28 @@ while running:
 
         elif collected1 == False:
             chest1.draw()
+
+        if cowboy.rect.colliderect(chest2.rect) and collected2 == False:
+            # checks if a collision between the player and item has occurred
+            # and if it has already been collide with
+            chest2.update()
+            collected2 = True
+            items += 1
+            print(items)
+
+        elif collected2 == False:
+            chest2.draw()
+
+        if cowboy.rect.colliderect(chest3.rect) and collected3 == False:
+            # checks if a collision between the player and item has occurred
+            # and if it has already been collide with
+            chest3.update()
+            collected3 = True
+            items += 1
+            print(items)
+
+        elif collected3 == False:
+            chest3.draw()      
 
 
         if KA == True:
@@ -385,12 +446,20 @@ while running:
             goblin.rect = pygame.Rect(0, 0, 0, 0)
             # this elif statement will just set the knights rect to 0 size so it appears dead
 
+        if HA == True:
+            ghost.update()
+            if ghost.isclose(cowboy.x, cowboy.y, 300):
+                ghost.move(cowboy.x, cowboy.y)
+            ghost.display()
+        elif HA == False:
+            ghost.rect = pygame.Rect(0, 0, 0, 0)
+            # this elif statement will just set the knights rect to 0 size so it appears dead
         for bullet in bullets:
             bullet.draw(screen)
 
         clock.tick(60)
 
-        if items >= 1:
+        if items >= 3:
             leaderboard.MakeCurrent()
             game.EndCurrent()
 
