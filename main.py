@@ -41,14 +41,47 @@ playerX = 20
 playerY = 550
 # sets players initial x and y co ordinated
 
-#item
+# item
 itemImg = pygame.image.load("chest.png")
 itemImg = pygame.transform.scale(itemImg, (25, 30))
-#sets chests sprite
+# sets chests sprite
 
+FONT = pygame.font.Font(None, 32)
+
+class text:
+    def __init__(self,x, y, width=60, height=200, text=''):
+        # sets font as no italic and size 48
+        self.rect = pygame.Rect(x, y, width, height)
+        self.width = width
+        self.height = height
+        self.text = text
+        self.txt_surface = FONT.render(text, True, (255, 255, 255))
+
+    def gettext(self):
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    # if return key is pressed
+                    print(self.text)
+                    self.text = ''
+                elif event.type == pygame.K_BACKSPACE:
+                    # if backspace is pressed
+                    self.text = self.text[:-1]
+                else:
+                    self.text += event.unicode
+
+                self.txt_surface = FONT.render(self.text, True, (255, 255, 255))
+                # this re-renders text
+    def update(self):
+        width =max(200, self.txt_surface.get_width() + 10)
+        self.rect.w = width
+
+    def draw(self, screen):
+        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 5))
+        #blits text to screen
 
 class Screen():
-    def __init__(self, title, fill, width = 600, height = 600):
+    def __init__(self, title, fill, width=600, height=600):
         self.title = title
         # title of the screen so i can differentiate between them
         self.width = width
@@ -75,7 +108,7 @@ class Screen():
 
     def CheckUpdate(self):
         return self.current
-        #checks what screen needs to be showing at that time
+        # checks what screen needs to be showing at that time
 
     def ScreenUpdate(self, isGame):
         if self.current and isGame == False:
@@ -91,19 +124,25 @@ class Screen():
         return self.screen
 
 
-class text:
-  def __init__(self, font, width = 60, height = 200):
-    self.font = pygame.font.sysfont(None, 48)
-    #sets font as no italic and size 48
-    self.width = width
-    self.height = height
+class walls:
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        #sets x, y coordinates and sets width and height
 
-  def getkeys(self):
-    for event in pygame.event.get():
-      press = event.type
-    
-    
-  
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        # walls rect on screen. doesnt need to be blitted as its already
+        # drew on the map
+
+    def collide(self, object_rect):
+        if object_rect.colliderect(self.rect):
+            return True
+        else:
+            return False
+        # tests if an objects rect has collided with the wall.
+
 
 class Character:  # this class handles most parts to do with the player
     def __init__(self, x, y, img, vel):
@@ -156,7 +195,6 @@ class Character:  # this class handles most parts to do with the player
     def update(self):
         self.rect = pygame.Rect(self.x, self.y, 30, 40)
 
-
     def display(self):
         screen.blit(self.img, (self.x, self.y))
         pygame.draw.rect(screen, (0, 0, 255), (self.x, self.y, 30, 40), 2)
@@ -165,7 +203,7 @@ class Character:  # this class handles most parts to do with the player
 # Enemy
 knightImg = pygame.image.load("knight.png")
 goblinImg = pygame.image.load("goblin.png")
-ghostImg = pygame.image.load("knight.png")
+ghostImg = pygame.image.load("ghost.png")
 knightImg = pygame.transform.scale(knightImg, (30, 40))
 goblinImg = pygame.transform.scale(goblinImg, (30, 40))
 ghostImg = pygame.transform.scale(ghostImg, (30, 40))
@@ -175,6 +213,8 @@ goblinX = 150
 goblinY = 120
 ghostX = 200
 ghostY = 480
+
+
 # This sets the coordinates and relevant images for each enemy
 
 # same as player class for now will again most likely change
@@ -298,7 +338,7 @@ class Item:
 
 
 chest1 = Item(140, 30, itemImg)
-chest2 = Item(470 ,430, itemImg)
+chest2 = Item(470, 430, itemImg)
 chest3 = Item(490, 170, itemImg)
 cowboy = Character(playerX, playerY, playerImg, 10)
 goblin = Enemy(goblinX, goblinY, goblinImg, 2, 3)
@@ -308,26 +348,41 @@ pos = (cowboy.x, cowboy.y)
 bullets = []
 hit = 0
 KA = True
-#knight alvie
+# knight alvie
 GA = True
-#goblin alvive
+# goblin alvive
 HA = True
-#ghost alive
+# ghost alive
 collected1 = False
 collected2 = False
 collected3 = False
 game = Screen("game", map)
 menu = Screen("menu", (50.5, 50.5, 50.5))
 leaderboard = Screen("leaderboard", (50.5, 50.5, 50.5))
-game.MakeCurrent()
+menu.MakeCurrent()
 # sets this as the first screen
+walls = [walls(75, 404, 27, 196)]
+#makes list of all walls
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
 running = True
 while running:
 
+    if menu.CheckUpdate():
+        menu.ScreenUpdate(False)
+        TBox = text(150, 150)
+        TBox.gettext()
 
-    if game.CheckUpdate():
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+
+
+
+
+
+    elif game.CheckUpdate():
         game.ScreenUpdate(True)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -364,7 +419,7 @@ while running:
                     GA = False
                     # GA is checks the alive state of the goblin
                     print("goblin dead")
-                  
+
             if ghost.rect.colliderect(bullet.rect):
                 # checks whether a collision has occured between the bullet and enemy
                 print("hit")
@@ -383,16 +438,21 @@ while running:
             # This handles the goblins collisions and health
             # either updates bullets position or removes bullet if not on screen
 
-
-
         # places map onto screen
 
-        cowboy.KeyStroke()
         cowboy.display()
+        cowboy.KeyStroke()
         cowboy.update()
         chest1.update()
         chest2.update()
         chest3.update()
+
+        for wall in walls:
+
+            pcopy = cowboy.copy()
+            if wall.collide(cowboy.rect):
+                print(pcopy.Rect.x)
+
 
         if cowboy.rect.colliderect(chest1.rect) and collected1 == False:
             # checks if a collision between the player and item has occurred
@@ -425,8 +485,7 @@ while running:
             print(items)
 
         elif collected3 == False:
-            chest3.draw()      
-
+            chest3.draw()
 
         if KA == True:
             knight.update()
