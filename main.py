@@ -48,7 +48,7 @@ itemImg = pygame.transform.scale(itemImg, (25, 30))
 
 FONT = pygame.font.Font(None, 32)
 
-class text:
+class Text:
     def __init__(self,x, y, width=60, height=200, text=''):
         # sets font as no italic and size 48
         self.rect = pygame.Rect(x, y, width, height)
@@ -370,15 +370,19 @@ while running:
 
     if menu.CheckUpdate():
         menu.ScreenUpdate(False)
-        TBox = text(150, 150)
+        TBox = Text(150, 150)
         TBox.gettext()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                TBox.gettext()
 
+            TBox.update()
+            #menu.ScreenUpdate(False)
+            TBox.draw(screen)
 
-
+            pygame.display.flip()
 
 
 
@@ -449,9 +453,10 @@ while running:
 
         for wall in walls:
 
-            pcopy = cowboy.copy()
+            #pcopy = cowboy.copy()
             if wall.collide(cowboy.rect):
-                print(pcopy.Rect.x)
+                #print(pcopy.Rect.x)
+                pass
 
 
         if cowboy.rect.colliderect(chest1.rect) and collected1 == False:
