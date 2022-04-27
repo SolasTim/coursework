@@ -48,6 +48,7 @@ itemImg = pygame.transform.scale(itemImg, (25, 30))
 # sets chests sprite
 
 FONT = pygame.font.Font(None, 32)
+menuDone = False
 
 class Text:
     def __init__(self,x, y, width=60, height=200, text=''):
@@ -60,6 +61,8 @@ class Text:
         self.text = text
         self.txt_surface = FONT.render(text, True, (255, 255, 255))
         # gives the text a font and colour
+        self.done = False
+        self.name = ""
 
     def gettext(self, event):
         if event.type == pygame.KEYDOWN:
@@ -71,9 +74,13 @@ class Text:
                     self.text = ''
                 else:
                     print(self.text)
+                    self.name = self.text
                     self.text = ''
-                    return self.text
                     # resets string
+
+                    self.done = True
+
+
             elif event.key == pygame.K_BACKSPACE:
                 # if backspace is pressed
                 self.text = self.text[:-1]
@@ -145,7 +152,7 @@ def leaderboardAdd(name, score, time):
     for line in lb:
         leaderboard.append(line)
     lb.close()
-    entry=(name+","+str(score)+ "," + str(time) + "\n")
+    entry=(str(name) + "," + str(score) + "," + str(time) + "\n")
     # formats a new entry for the leaderboard file
     leaderboard.append(str(entry))
     # adds the name score and time to the new entry
@@ -197,11 +204,12 @@ class walls:
 
 
 class Character:  # this class handles most parts to do with the player
-    def __init__(self, x, y, img, vel):
+    def __init__(self, x, y, img, vel, health):
         self.x = x
         self.y = y
         self.img = img
         self.vel = vel
+        self.health = health
 
     # the constructor method allows for the player to have different attributes when called
 
@@ -263,8 +271,8 @@ knightX = 360
 knightY = 550
 goblinX = 150
 goblinY = 120
-ghostX = 200
-ghostY = 480
+ghostX = 430
+ghostY = 150
 
 
 # This sets the coordinates and relevant images for each enemy
@@ -392,7 +400,7 @@ class Item:
 chest1 = Item(140, 30, itemImg)
 chest2 = Item(470, 430, itemImg)
 chest3 = Item(490, 170, itemImg)
-cowboy = Character(playerX, playerY, playerImg, 10)
+cowboy = Character(playerX, playerY, playerImg, 10, 10)
 goblin = Enemy(goblinX, goblinY, goblinImg, 2, 3)
 knight = Enemy(knightX, knightY, knightImg, 0.5, 5)
 ghost = Enemy(ghostX, ghostY, ghostImg, 2, 4)
@@ -416,6 +424,7 @@ menu.MakeCurrent()
 walls = [walls(75, 404, 27, 196)]
 #makes list of all walls
 TBox = Text(250, 300)
+Lost = False
 
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
@@ -428,7 +437,7 @@ while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            NAME = TBox.gettext(event)
+            TBox.gettext(event)
             # stores players name for the leaderboard.
 
         TBox.update()
@@ -437,9 +446,11 @@ while running:
 
         pygame.display.flip()
 
-        if not NAME == None:
+        if TBox.done == True:
             # sees whether the Name variable is filled
             # if a name is accepted this means the menu screen must be finished.
+            print(TBox.text)
+            name = TBox.text
             game.MakeCurrent()
             menu.EndCurrent()
 
@@ -496,6 +507,11 @@ while running:
                 # checks collision between player and bullet
                 print("players hit")
                 bullets.remove(bullet)
+                cowboy.health -= 1
+                if cowboy.health == 0:
+                    Lost = True
+
+
 
             # This handles the goblins collisions and health
             # either updates bullets position or removes bullet if not on screen
@@ -581,14 +597,26 @@ while running:
 
         clock.tick(60)
 
-        if items >= 3:
+        if items >= 3 or Lost == True:
+            if cowboy.health == 0:
+                hp = 0
+            elif cowboy.health <0:
+                hp = cowboy.health
+
             leaderboard.MakeCurrent()
             game.EndCurrent()
 
     elif leaderboard.CheckUpdate():
+
         leaderboard.ScreenUpdate(False, None)
-        leaderboardAdd(NAME, 1 ,1)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+        
+        
+        leaderboardAdd(TBox.name, 20, 20)
+        #fix so doesnt add it million times
+
+
+
     pygame.display.update()
