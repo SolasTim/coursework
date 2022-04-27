@@ -31,6 +31,7 @@ pygame.display.set_icon(icon)
 
 # map
 map = pygame.image.load("map.png").convert()
+menuImg = pygame.image.load("menu.png").convert()
 # loads the image so its usable by pygame
 
 # player
@@ -52,28 +53,40 @@ class Text:
     def __init__(self,x, y, width=60, height=200, text=''):
         # sets font as no italic and size 48
         self.rect = pygame.Rect(x, y, width, height)
+        # sets rectangle of text "box"
         self.width = width
         self.height = height
+        # dimensions of box
         self.text = text
         self.txt_surface = FONT.render(text, True, (255, 255, 255))
+        # gives the text a font and colour
 
-    def gettext(self):
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    # if return key is pressed
+    def gettext(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                # if return key is pressed
+                if len(self.text) > 10 or len(self.text) < 3:
+                    # checks if name is longer than 10 or less than 3 characters
+                    print("Name too long or short")
+                    self.text = ''
+                else:
                     print(self.text)
                     self.text = ''
-                elif event.type == pygame.K_BACKSPACE:
-                    # if backspace is pressed
-                    self.text = self.text[:-1]
-                else:
-                    self.text += event.unicode
+                    return self.text
+                    # resets string
+            elif event.key == pygame.K_BACKSPACE:
+                # if backspace is pressed
+                self.text = self.text[:-1]
+                # when backspace is hit the one item will be removed
+            else:
+                self.text += event.unicode
+                # takes any keyboard input
 
-                self.txt_surface = FONT.render(self.text, True, (255, 255, 255))
-                # this re-renders text
+            self.txt_surface = FONT.render(self.text, True, (255, 255, 255))
+            # this re-renders text
+
     def update(self):
-        width =max(200, self.txt_surface.get_width() + 10)
+        width = max(200, self.txt_surface.get_width() + 10)
         self.rect.w = width
 
     def draw(self, screen):
@@ -110,18 +123,57 @@ class Screen():
         return self.current
         # checks what screen needs to be showing at that time
 
-    def ScreenUpdate(self, isGame):
+    def ScreenUpdate(self, isGame, img):
         if self.current and isGame == False:
             # the isGame parameter is nececarry as the game needs to blit
             # a picture not wipe a single colour
             self.screen.fill(self.fill)
             # wipes screen to one colour
         elif isGame == True and isGame == True:
-            self.screen.blit(map, [0, 0])
+            self.screen.blit(img, [0, 0])
             # displays the map onto the screen
 
     def ReturnTitle(self):
         return self.screen
+
+
+def leaderboardAdd(name, score, time):
+    leaderboard = []
+    # initialises some scratch lists as blank, for use when opening/closing files
+    lb=open("leaderboard.csv")
+    # opens leaderboard file and appends to list
+    for line in lb:
+        leaderboard.append(line)
+    lb.close()
+    entry=(name+","+str(score)+ "," + str(time) + "\n")
+    # formats a new entry for the leaderboard file
+    leaderboard.append(str(entry))
+    # adds the name score and time to the new entry
+    lb=open("leaderboard.csv", "w")
+    # rewrites leaderboard file for new formatted value
+    for line in leaderboard:
+        lb.write(line)
+    lb.close()
+
+
+def leaderboardRead():
+
+    scores = []
+    # another scratch list
+    # following lines are taken and adapted from https://bit.ly/32UlHrr
+    # opens leaderboard file (yes, AGAIN) and formats it in a nice way
+    with open('leaderboard.csv') as f:
+       for line in f:
+           name, score, time = line.split(',')
+           scores.append((int(score), name.strip()))
+    scores.sort(reverse=True)
+    # sorts based on score, in descending order
+    print("Top 5 scores: \n Name    Score     Time")
+    # outputs scores
+    for (score, name), _ in zip(scores, range(len(scores))):
+       print(f'{name} - {score} - {time}')
+
+
 
 
 class walls:
@@ -357,37 +409,43 @@ collected1 = False
 collected2 = False
 collected3 = False
 game = Screen("game", map)
-menu = Screen("menu", (50.5, 50.5, 50.5))
+menu = Screen("menu", menuImg)
 leaderboard = Screen("leaderboard", (50.5, 50.5, 50.5))
 menu.MakeCurrent()
 # sets this as the first screen
 walls = [walls(75, 404, 27, 196)]
 #makes list of all walls
+TBox = Text(250, 300)
+
 
 # game loop will allow game to run. Will iterate players model to move along with projectiles and enemy movement.
 running = True
 while running:
 
     if menu.CheckUpdate():
-        menu.ScreenUpdate(False)
-        TBox = Text(150, 150)
-        TBox.gettext()
+        menu.ScreenUpdate(True, menuImg)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                TBox.gettext()
+            NAME = TBox.gettext(event)
+            # stores players name for the leaderboard.
 
-            TBox.update()
-            #menu.ScreenUpdate(False)
-            TBox.draw(screen)
+        TBox.update()
+        menu.ScreenUpdate(True, menuImg)
+        TBox.draw(screen)
 
-            pygame.display.flip()
+        pygame.display.flip()
 
+        if not NAME == None:
+            # sees whether the Name variable is filled
+            # if a name is accepted this means the menu screen must be finished.
+            game.MakeCurrent()
+            menu.EndCurrent()
 
 
     elif game.CheckUpdate():
-        game.ScreenUpdate(True)
+        game.ScreenUpdate(True, map)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -528,8 +586,8 @@ while running:
             game.EndCurrent()
 
     elif leaderboard.CheckUpdate():
-        leaderboard.ScreenUpdate(False)
-        print("this where leaderboard be's")
+        leaderboard.ScreenUpdate(False, None)
+        leaderboardAdd(NAME, 1 ,1)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
