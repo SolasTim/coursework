@@ -598,10 +598,14 @@ while running:
         clock.tick(60)
 
         if items >= 3 or Lost == True:
-            if cowboy.health == 0:
-                hp = 0
-            elif cowboy.health <0:
+            if cowboy.health > 0:
                 hp = cowboy.health
+                leaderboardAdd(TBox.name, 5000, 40)
+                # if player wins the game score, name and time are added to leaderboard
+            elif cowboy.health <= 0:
+                hp = 0
+                leaderboardAdd(TBox.name, 0, 0)
+                # if player loses name is added but score is set to 0.
 
             leaderboard.MakeCurrent()
             game.EndCurrent()
@@ -612,10 +616,8 @@ while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        
-        
-        leaderboardAdd(TBox.name, 20, 20)
-        #fix so doesnt add it million times
+
+
 
 
 
