@@ -100,6 +100,7 @@ class Text:
         screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 5))
         #blits text to screen
 
+
 class Screen():
     def __init__(self, title, fill, width=600, height=600):
         self.title = title
@@ -166,22 +167,29 @@ def leaderboardAdd(name, score, time):
 def leaderboardRead():
 
     scores = []
-    # another scratch list
+    # opens empty list
     # following lines are taken and adapted from https://bit.ly/32UlHrr
-    # opens leaderboard file (yes, AGAIN) and formats it in a nice way
+    # opens leaderboard file  and formats it in respect to name, score, time
     with open('leaderboard.csv') as f:
-       for line in f:
-           name, score, time = line.split(',')
-           scores.append((int(score), name.strip()))
+        for line in f:
+            name, score, time = line.split(',')
+            scores.append((int(score), name.strip()))
     scores.sort(reverse=True)
     # sorts based on score, in descending order
     print("Top 5 scores: \n Name    Score     Time")
     # outputs scores
-    for (score, name), _ in zip(scores, range(len(scores))):
-       print(f'{name} - {score} - {time}')
 
+    y = 200
+    font = pygame.font.Font(None, 70)
+    # sets the font to default and size to 32
 
-
+    for (score, name), _ in zip(scores, range(5)):
+        text = font.render(f'{name} - {score} - {time}', True, (255, 255, 255))
+        # creates a surface that text can be drew on
+        screen.blit(text, (50, y))
+        # displays text at co ordinates (50, y) on screen
+        y += 70
+        # makes next line display one under the other
 
 class walls:
     def __init__(self, x, y, width, height):
@@ -197,6 +205,7 @@ class walls:
 
     def collide(self, object_rect):
         if object_rect.colliderect(self.rect):
+            print(object_rect)
             return True
         else:
             return False
@@ -325,6 +334,7 @@ class Projectile:
         if isPlayer == True:
             # this statement will execute when the player is shooting
             mx, my = pygame.mouse.get_pos()
+            print(mx, my)
             # get position of mouse on screen
             self.pos = (x, y)
             # position of bullet
@@ -419,7 +429,7 @@ collected3 = False
 game = Screen("game", map)
 menu = Screen("menu", menuImg)
 leaderboard = Screen("leaderboard", (50.5, 50.5, 50.5))
-menu.MakeCurrent()
+leaderboard.MakeCurrent()
 # sets this as the first screen
 walls = [walls(75, 404, 27, 196)]
 #makes list of all walls
@@ -443,6 +453,8 @@ while running:
         TBox.update()
         menu.ScreenUpdate(True, menuImg)
         TBox.draw(screen)
+        #leaderboardRead()
+        # calls the leaderboard read function to output scores
 
         pygame.display.flip()
 
@@ -598,6 +610,7 @@ while running:
         clock.tick(60)
 
         if items >= 3 or Lost == True:
+            # checks conditions to see if game has finished
             if cowboy.health > 0:
                 hp = cowboy.health
                 leaderboardAdd(TBox.name, 5000, 40)
@@ -608,7 +621,9 @@ while running:
                 # if player loses name is added but score is set to 0.
 
             leaderboard.MakeCurrent()
+            # makes leaderboard the new screen
             game.EndCurrent()
+            # stops game from being the current screen
 
     elif leaderboard.CheckUpdate():
 
@@ -616,8 +631,30 @@ while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+        leaderboardRead()
 
+        Won = "You Won!"
+        NotWon = "You lost..."
 
+        if Lost == False:
+            Lfont = pygame.font.Font(None, 70)
+            # sets leader board text font
+            Ltext = text = Lfont.render(Won, True, (0, 255, 0))
+            # sets the surface for text to be rendered onto
+            screen.blit(Ltext, (150, 20))
+            # displays the text
+            Ltext = Lfont.render(("Name  Score  Time"), True, (150, 0, 200))
+            screen.blit(Ltext, (50, 120))
+
+        if Lost == True:
+            Lfont = pygame.font.Font(None, 70)
+            # sets leader board text font
+            Ltext = Lfont.render(NotWon, True, (200, 0, 0))
+            # sets the surface for text to be rendered onto
+            screen.blit(Ltext, (150, 20))
+            # displays the text
+            Ltext = Lfont.render(("Name  Score  Time"), True, (150, 0, 200))
+            screen.blit(Ltext, (50, 120))
 
 
 
