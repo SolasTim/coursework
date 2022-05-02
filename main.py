@@ -208,12 +208,32 @@ class walls:
         # walls rect on screen. doesnt need to be blitted as its already
         # drew on the map
 
-    def collide(self, object_rect):
+    def collide(self, object_rect, direction, objectx, objecty, objectvel):
         if object_rect.colliderect(self.rect):
-            #print(object_rect)
-            return True
+            if direction == "right":
+                # finds if the direction is going right
+                objectx -= objectvel
+                print("right")
+                # changes coordinate to the opposite direction of
+                #  travel at displacement the objects speed
+            if direction == "left":
+                # finds if the direction is going left
+                objectx += objectvel
+                print("left")
+                # changes coordinate to the opposite direction of
+                #  travel at displacement the objects speed
+            if direction == "up":
+                # finds if the direction is going up
+                objecty += objectvel
+                # changes coordinate to the opposite direction of
+                #  travel at displacement the objects speed
+            if direction == "down":
+                # finds if the direction is going down
+                objecty -= objectvel
+                # changes coordinate to the opposite direction of
+                #  travel at displacement the objects speed
         else:
-            return False
+            pass
         # tests if an objects rect has collided with the wall.
 
 
@@ -301,6 +321,7 @@ class Enemy:
         self.img = img
         self.vel = vel
         self.health = health
+        self.dir = ""
 
     def isclose(self, playerX, playerY, distance):
         return math.hypot(self.x - playerX, self.y - playerY) < float(distance)
@@ -311,13 +332,17 @@ class Enemy:
         # Movement along x direction
         if self.x > playerX:
             self.x -= self.vel
+            self.dir = ("left")
         elif self.x < playerX:
             self.x += self.vel
+            self.dir = ("right")
         # Movement along y direction
         if self.y < playerY:
             self.y += self.vel
+            self.dir = ("down")
         elif self.y > playerY:
             self.y -= self.vel
+            self.dir = ("up")
         # moves enemy towards player
 
     def update(self):
@@ -419,6 +444,7 @@ cowboy = Character(playerX, playerY, playerImg, 10, 10)
 goblin = Enemy(goblinX, goblinY, goblinImg, 2, 3)
 knight = Enemy(knightX, knightY, knightImg, 0.5, 5)
 ghost = Enemy(ghostX, ghostY, ghostImg, 2, 4)
+enemies = [goblin, knight, ghost]
 pos = (cowboy.x, cowboy.y)
 bullets = []
 hit = 0
@@ -546,25 +572,40 @@ while running:
         chest2.update()
         chest3.update()
 
+
         for wall in walls:
 
-            #pcopy = cowboy.copy()
-            if wall.collide(cowboy.rect):
+            pressed = pygame.key.get_pressed()
+            # pressed retrieves any key that is being pressed
+            if pressed[pygame.K_RIGHT]:
+                # finds if the key being pressed is right arrow
+                wall.collide(cowboy.rect, "right", cowboy.x, cowboy.y, cowboy.vel)
+                # changes coordinate to the opposite direction of
+                #  travel at displacement the players speed
+            if pressed[pygame.K_LEFT]:
+                # finds if the key being pressed is right arrow
+                wall.collide(cowboy.rect, "left", cowboy.x, cowboy.y, cowboy.vel)
+            if pressed[pygame.K_UP]:
+                wall.collide(cowboy.rect, "up", cowboy.x, cowboy.y, cowboy.vel)
+            if pressed[pygame.K_DOWN]:
+                wall.collide(cowboy.rect, "down", cowboy.x, cowboy.y, cowboy.vel)
 
-                pressed = pygame.key.get_pressed()
-                # pressed retrieves any key that is being pressed
-                if pressed[pygame.K_RIGHT]:
+            for enemy in enemies:
+                if enemy.dir == "right":
                     # finds if the key being pressed is right arrow
-                    cowboy.x -= cowboy.vel
-                    # changes coordiante to
-                    print("yes")
-                if pressed[pygame.K_LEFT]:
-                    cowboy.x += cowboy.vel
+                    wall.collide(enemy.rect, "right", enemy.x, enemy.y, enemy.vel)
+                    # changes coordinate to the opposite direction of
+                    #  travel at displacement the players speed
+                if enemy.dir == "left":
+                    # finds if the key being pressed is right arrow
+                    wall.collide(enemy.rect, "left", enemy.x, enemy.y, enemy.vel)
+                if enemy.dir == "up":
+                    wall.collide(enemy.rect, "up", enemy.x, enemy.y, enemy.vel)
+                if enemy.dir == "down":
+                    wall.collide(enemy.rect, "down", enemy.x, enemy.y, enemy.vel)
 
 
-                pass
-
-
+        # please just end me now i think that would be easier than finishing
         if cowboy.rect.colliderect(chest1.rect) and collected1 == False:
             # checks if a collision between the player and item has occurred
             # and if it has already been collide with
