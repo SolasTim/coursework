@@ -1,5 +1,6 @@
 import pygame
 import math
+import time
 
 # initialise pygame
 pygame.init()
@@ -49,6 +50,12 @@ itemImg = pygame.transform.scale(itemImg, (25, 30))
 
 FONT = pygame.font.Font(None, 32)
 menuDone = False
+
+#def score():
+
+
+
+
 
 class Text:
     def __init__(self,x, y, width=60, height=200, text=''):
@@ -173,17 +180,15 @@ def leaderboardRead():
     with open('leaderboard.csv') as f:
         for line in f:
             name, score, time = line.split(',')
-            scores.append((int(score), name.strip()))
+            scores.append((int(score), name.strip(), time))
     scores.sort(reverse=True)
     # sorts based on score, in descending order
-    print("Top 5 scores: \n Name    Score     Time")
-    # outputs scores
 
     y = 200
     font = pygame.font.Font(None, 70)
     # sets the font to default and size to 32
 
-    for (score, name), _ in zip(scores, range(5)):
+    for (score, name, time), _ in zip(scores, range(5)):
         text = font.render(f'{name} - {score} - {time}', True, (255, 255, 255))
         # creates a surface that text can be drew on
         screen.blit(text, (50, y))
@@ -205,7 +210,7 @@ class walls:
 
     def collide(self, object_rect):
         if object_rect.colliderect(self.rect):
-            print(object_rect)
+            #print(object_rect)
             return True
         else:
             return False
@@ -429,7 +434,7 @@ collected3 = False
 game = Screen("game", map)
 menu = Screen("menu", menuImg)
 leaderboard = Screen("leaderboard", (50.5, 50.5, 50.5))
-leaderboard.MakeCurrent()
+game.MakeCurrent()
 # sets this as the first screen
 walls = [walls(75, 404, 27, 196)]
 #makes list of all walls
@@ -464,7 +469,11 @@ while running:
             print(TBox.text)
             name = TBox.text
             game.MakeCurrent()
+            # makes the game window the active screen
             menu.EndCurrent()
+            # stops menu from being the active screen
+            start_time = time.time()
+            # records time
 
 
     elif game.CheckUpdate():
@@ -541,7 +550,18 @@ while running:
 
             #pcopy = cowboy.copy()
             if wall.collide(cowboy.rect):
-                #print(pcopy.Rect.x)
+
+                pressed = pygame.key.get_pressed()
+                # pressed retrieves any key that is being pressed
+                if pressed[pygame.K_RIGHT]:
+                    # finds if the key being pressed is right arrow
+                    cowboy.x -= cowboy.vel
+                    # changes coordiante to
+                    print("yes")
+                if pressed[pygame.K_LEFT]:
+                    cowboy.x += cowboy.vel
+
+
                 pass
 
 
@@ -613,11 +633,24 @@ while running:
             # checks conditions to see if game has finished
             if cowboy.health > 0:
                 hp = cowboy.health
-                leaderboardAdd(TBox.name, 5000, 40)
+                stop_time = time.time()
+                # records time
+                endtime = round(stop_time - start_time, 2)
+                # minuses the end time from start time to find total elapsed time.
+                print(endtime)
+                # prints elapsed time
+                leaderboardAdd(TBox.name, 5000, endtime)
                 # if player wins the game score, name and time are added to leaderboard
             elif cowboy.health <= 0:
                 hp = 0
-                leaderboardAdd(TBox.name, 0, 0)
+                stop_time = time.time()
+                # records time
+                endtime = round(stop_time - start_time, 2)
+                # minuses the end time from start time to find total elapsed time.
+                # also rounds to 2 decimal places so leaderboard formats better.
+                print(endtime)
+                # prints elapsed time
+                leaderboardAdd(TBox.name, 0, endtime)
                 # if player loses name is added but score is set to 0.
 
             leaderboard.MakeCurrent()
@@ -625,8 +658,8 @@ while running:
             game.EndCurrent()
             # stops game from being the current screen
 
-    elif leaderboard.CheckUpdate():
 
+    elif leaderboard.CheckUpdate():
         leaderboard.ScreenUpdate(False, None)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -655,7 +688,5 @@ while running:
             # displays the text
             Ltext = Lfont.render(("Name  Score  Time"), True, (150, 0, 200))
             screen.blit(Ltext, (50, 120))
-
-
 
     pygame.display.update()
