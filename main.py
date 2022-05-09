@@ -51,11 +51,19 @@ itemImg = pygame.transform.scale(itemImg, (25, 30))
 FONT = pygame.font.Font(None, 32)
 menuDone = False
 
-#def score():
-
-
-
-
+def score(time, health):
+    c0 = 10
+    # score constant
+    t0 = 0.001
+    # time constant
+    C = health * 3
+    # health and items collected
+    total = (C +c0)/(time *t0)
+    # refer to design for equation
+    total = math.trunc(total)
+    # truncates value so it is formatted nice
+    return total
+    # returns the score value
 
 class Text:
     def __init__(self,x, y, width=60, height=200, text=''):
@@ -208,33 +216,45 @@ class walls:
         # walls rect on screen. doesnt need to be blitted as its already
         # drew on the map
 
-    def collide(self, object_rect, direction, objectx, objecty, objectvel):
+    def collide(self, object_rect, direction, objectx, objecty, objectvel, XY):
         if object_rect.colliderect(self.rect):
-            if direction == "right":
-                # finds if the direction is going right
-                objectx -= objectvel
-                print("right")
-                # changes coordinate to the opposite direction of
-                #  travel at displacement the objects speed
-            if direction == "left":
-                # finds if the direction is going left
-                objectx += objectvel
-                print("left")
-                # changes coordinate to the opposite direction of
-                #  travel at displacement the objects speed
-            if direction == "up":
-                # finds if the direction is going up
-                objecty += objectvel
-                # changes coordinate to the opposite direction of
-                #  travel at displacement the objects speed
-            if direction == "down":
-                # finds if the direction is going down
-                objecty -= objectvel
-                # changes coordinate to the opposite direction of
-                #  travel at displacement the objects speed
-        else:
-            pass
+            if XY == "X":
+                if direction == "right":
+                    # finds if the direction is going right
+                    objectx -= objectvel
+                    # changes coordinate to the opposite direction of
+                    #  travel at displacement the objects speed
+                    return objectx
+
+                if direction == "left":
+                    # finds if the direction is going left
+                    objectx += objectvel
+                    print("left")
+                    # changes coordinate to the opposite direction of
+                    #  travel at displacement the objects speed
+                    return objectx
+            else:
+                return objectx
+
+            if XY == "Y":
+                if direction == "up":
+                    # finds if the direction is going up
+                    objecty += objectvel
+                    # changes coordinate to the opposite direction of
+                    #  travel at displacement the objects speed
+                    return objecty
+
+                if direction == "down":
+                    # finds if the direction is going down
+                    objecty -= objectvel
+                    # changes coordinate to the opposite direction of
+                    #  travel at displacement the objects speed
+                    return objecty
+            else:
+                return objecty
+
         # tests if an objects rect has collided with the wall.
+
 
 
 class Character:  # this class handles most parts to do with the player
@@ -333,6 +353,7 @@ class Enemy:
         if self.x > playerX:
             self.x -= self.vel
             self.dir = ("left")
+            # sets the direction of enemy
         elif self.x < playerX:
             self.x += self.vel
             self.dir = ("right")
@@ -340,10 +361,12 @@ class Enemy:
         if self.y < playerY:
             self.y += self.vel
             self.dir = ("down")
+        # detects if the enemy is moving down and updates their
+        # y position
         elif self.y > playerY:
             self.y -= self.vel
             self.dir = ("up")
-        # moves enemy towards player
+        # moves enemy towards player in the y direction
 
     def update(self):
         self.rect = pygame.Rect(self.x, self.y, 30, 40)
@@ -460,7 +483,7 @@ collected3 = False
 game = Screen("game", map)
 menu = Screen("menu", menuImg)
 leaderboard = Screen("leaderboard", (50.5, 50.5, 50.5))
-game.MakeCurrent()
+menu.MakeCurrent()
 # sets this as the first screen
 walls = [walls(75, 404, 27, 196)]
 #makes list of all walls
@@ -557,11 +580,13 @@ while running:
                 cowboy.health -= 1
                 if cowboy.health == 0:
                     Lost = True
-
-
-
             # This handles the goblins collisions and health
             # either updates bullets position or removes bullet if not on screen
+
+            for wall in walls:
+                if wall.rect.colliderect((bullet.rect)):
+                    bullets.remove(bullet)
+                # if a bullet hits a wall then remove the bullet from the screen
 
         # places map onto screen
 
@@ -579,30 +604,72 @@ while running:
             # pressed retrieves any key that is being pressed
             if pressed[pygame.K_RIGHT]:
                 # finds if the key being pressed is right arrow
-                wall.collide(cowboy.rect, "right", cowboy.x, cowboy.y, cowboy.vel)
+                x = wall.collide(cowboy.rect, "right", cowboy.x, cowboy.y, cowboy.vel, "X")
+                if x == None:
+                    pass
+                # finds if player is in movable space or is hitting a wall.
+                else:
+                    cowboy.x = x
                 # changes coordinate to the opposite direction of
                 #  travel at displacement the players speed
+                print(x)
             if pressed[pygame.K_LEFT]:
                 # finds if the key being pressed is right arrow
-                wall.collide(cowboy.rect, "left", cowboy.x, cowboy.y, cowboy.vel)
+                x = wall.collide(cowboy.rect, "left", cowboy.x, cowboy.y, cowboy.vel, "X")
+                # x is a placeholder value for the objects new coordinate
+                if x == None:
+                    pass
+                # finds if player is in movable space or is hitting a wall.
+                else:
+                    cowboy.x = x
             if pressed[pygame.K_UP]:
-                wall.collide(cowboy.rect, "up", cowboy.x, cowboy.y, cowboy.vel)
+                y = wall.collide(cowboy.rect, "up", cowboy.x, cowboy.y, cowboy.vel, "Y")
+                if y == None:
+                    pass
+                # finds if player is in movable space or is hitting a wall.
+                else:
+                    cowboy.y = y
             if pressed[pygame.K_DOWN]:
-                wall.collide(cowboy.rect, "down", cowboy.x, cowboy.y, cowboy.vel)
+                y = wall.collide(cowboy.rect, "down", cowboy.x, cowboy.y, cowboy.vel, "Y")
+                if y == None:
+                    pass
+                # finds if player is in movable space or is hitting a wall.
+                else:
+                    cowboy.y = y
 
             for enemy in enemies:
                 if enemy.dir == "right":
                     # finds if the key being pressed is right arrow
-                    wall.collide(enemy.rect, "right", enemy.x, enemy.y, enemy.vel)
+                    x = wall.collide(enemy.rect, "right", enemy.x, enemy.y, enemy.vel, "X")
                     # changes coordinate to the opposite direction of
                     #  travel at displacement the players speed
+                    if x == None:
+                        pass
+                    # finds if enemy is in movable space or is hitting a wall.
+                    else:
+                        enemy.x = x
                 if enemy.dir == "left":
                     # finds if the key being pressed is right arrow
-                    wall.collide(enemy.rect, "left", enemy.x, enemy.y, enemy.vel)
+                    x = wall.collide(enemy.rect, "left", enemy.x, enemy.y, enemy.vel, "X")
+                    if x == None:
+                        pass
+                    # finds if enemy is in movable space or is hitting a wall.
+                    else:
+                        enemy.x = x
                 if enemy.dir == "up":
-                    wall.collide(enemy.rect, "up", enemy.x, enemy.y, enemy.vel)
+                    y = wall.collide(enemy.rect, "up", enemy.x, enemy.y, enemy.vel, "Y")
+                    if y == None:
+                        pass
+                    # finds if enemy is in movable space or is hitting a wall.
+                    else:
+                        enemy.y = y
                 if enemy.dir == "down":
-                    wall.collide(enemy.rect, "down", enemy.x, enemy.y, enemy.vel)
+                    y = wall.collide(enemy.rect, "down", enemy.x, enemy.y, enemy.vel, "Y")
+                    if y == None:
+                        pass
+                    # finds if enemy is in movable space or is hitting a wall.
+                    else:
+                        enemy.y = y
 
 
         # please just end me now i think that would be easier than finishing
@@ -680,7 +747,10 @@ while running:
                 # minuses the end time from start time to find total elapsed time.
                 print(endtime)
                 # prints elapsed time
-                leaderboardAdd(TBox.name, 5000, endtime)
+                SCORE = score(endtime, cowboy.health)
+                print(SCORE)
+                # stores score as a variable
+                leaderboardAdd(TBox.name, SCORE, endtime)
                 # if player wins the game score, name and time are added to leaderboard
             elif cowboy.health <= 0:
                 hp = 0
